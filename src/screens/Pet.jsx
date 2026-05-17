@@ -5,12 +5,15 @@ import { Icon, I, Card, EmojiCircle, IconBtn, Mascot, Eyebrow, Display, BottomNa
 export default function Pet() {
   const { nav, back } = useNav();
   const rows = [
-    { label:'Histórico de saúde',     emoji:'❤️', tint:T.tintRose,     meta:'12 registros',      to:'pet' },
+    { label:'Histórico de saúde',     emoji:'❤️', tint:T.tintRose,     meta:'12 registros',      to:'health' },
     { label:'Medicamentos ativos',    emoji:'💊', tint:T.tintLavender, meta:'5 ativos', dot:true, to:'meds' },
-    { label:'Consultas',              emoji:'📅', tint:T.tintSky,      meta:'Próxima · 22 mai',  to:'today' },
-    { label:'Documentos',             emoji:'📁', tint:T.tintCream,    meta:'8 arquivos',         to:'pet' },
-    { label:'Vacinas',                emoji:'🛡️',tint:T.tintMint,     meta:'Em dia',             to:'pet' },
-    { label:'Diário & comportamento', emoji:'📓', tint:T.tintPeach,    meta:'3 notas esta semana',to:'pet' },
+    { label:'Consultas',              emoji:'📅', tint:T.tintSky,      meta:'Próxima · 22 mai',  to:'vet' },
+    { label:'Vacinas',                emoji:'🛡️',tint:T.tintMint,     meta:'Em dia',             to:'vaccines' },
+    { label:'Documentos',             emoji:'📁', tint:T.tintCream,    meta:'8 arquivos',         to:'documents' },
+    { label:'Diário & comportamento', emoji:'📓', tint:T.tintPeach,    meta:'3 notas esta semana',to:'behaviordiary' },
+    { label:'Alimentação',            emoji:'🥣', tint:T.tintCream,    meta:'3 refeições/dia',    to:'feeding' },
+    { label:'Passeios & atividades',  emoji:'🐾', tint:T.tintMint,     meta:'3 de 5 esta semana', to:'walks' },
+    { label:'Higiene & beleza',       emoji:'✂️', tint:T.tintSky,      meta:'Banho · há 4 dias',  to:'hygiene' },
   ];
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg,

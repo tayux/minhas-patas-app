@@ -3,7 +3,7 @@ import { useNav } from '../components/NavContext.jsx';
 import { usePet, PETS } from '../components/PetContext.jsx';
 import { Icon, I, Card, EmojiCircle, SectionPill, CheckBubble, IconBtn, MascotAvatar, UserAvatar, Display, Eyebrow, BottomNav } from '../components/Shared.jsx';
 
-const TILE_ROUTES = { Saúde:'pet', Medicamentos:'meds', Finanças:'finance', Documentos:'pet' };
+const TILE_ROUTES = { Saúde:'health', Medicamentos:'meds', Finanças:'reports', Documentos:'documents' };
 const TILE_TINTS  = [
   { tint:T.tintRose,     ink:T.tintRoseInk     },
   { tint:T.tintLavender, ink:T.tintLavenderInk },
@@ -21,7 +21,7 @@ export default function Home() {
       <div style={{ flex:1, overflowY:'auto', padding:'4px 24px 16px' }}>
         {/* Header */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:8 }}>
-          <IconBtn icon={I.burger} className="btn-press" onClick={() => nav('notifications')} />
+          <IconBtn icon={I.burger} className="btn-press" onClick={() => nav('settings')} />
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             <IconBtn icon={I.bell} className="btn-press" onClick={() => nav('notifications')} />
             <UserAvatar size={40} name="Taynara" hue={28} />

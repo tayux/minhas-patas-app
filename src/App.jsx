@@ -4,28 +4,54 @@ import { PetProvider } from './components/PetContext.jsx';
 import { PhoneShell } from './components/Shared.jsx';
 import { T } from './theme.js';
 
-import Onboarding    from './screens/Onboarding.jsx';
-import Home          from './screens/Home.jsx';
-import Meds          from './screens/Meds.jsx';
-import AIReader      from './screens/AIReader.jsx';
-import Today         from './screens/Today.jsx';
-import Pet           from './screens/Pet.jsx';
-import Finance       from './screens/Finance.jsx';
-import LockNotif     from './screens/LockNotif.jsx';
-import Calendar      from './screens/Calendar.jsx';
-import Notifications from './screens/Notifications.jsx';
+import Onboarding       from './screens/Onboarding.jsx';
+import Home             from './screens/Home.jsx';
+import Meds             from './screens/Meds.jsx';
+import AIReader         from './screens/AIReader.jsx';
+import Today            from './screens/Today.jsx';
+import Pet              from './screens/Pet.jsx';
+import Finance          from './screens/Finance.jsx';
+import LockNotif        from './screens/LockNotif.jsx';
+import Calendar         from './screens/Calendar.jsx';
+import Notifications    from './screens/Notifications.jsx';
+import PetOnboarding    from './screens/PetOnboarding.jsx';
+import Health           from './screens/Health.jsx';
+import ExamUpload       from './screens/ExamUpload.jsx';
+import AddMedication    from './screens/AddMedication.jsx';
+import BehaviorDiary    from './screens/BehaviorDiary.jsx';
+import Feeding          from './screens/Feeding.jsx';
+import WalksActivities  from './screens/WalksActivities.jsx';
+import HygieneGrooming  from './screens/HygieneGrooming.jsx';
+import VetConsultations from './screens/VetConsultations.jsx';
+import DocumentsLibrary from './screens/DocumentsLibrary.jsx';
+import Settings         from './screens/Settings.jsx';
+import Vaccines         from './screens/Vaccines.jsx';
+import ReportsExport    from './screens/ReportsExport.jsx';
 
 const SCREENS = {
-  onboarding:    { component: Onboarding,    dark: false, modal: false },
-  home:          { component: Home,          dark: false, modal: false },
-  meds:          { component: Meds,          dark: false, modal: false },
-  ai:            { component: AIReader,      dark: false, modal: true  },
-  today:         { component: Today,         dark: false, modal: false },
-  pet:           { component: Pet,           dark: false, modal: false },
-  finance:       { component: Finance,       dark: false, modal: false },
-  lock:          { component: LockNotif,     dark: true,  modal: false },
-  calendar:      { component: Calendar,      dark: false, modal: true  },
-  notifications: { component: Notifications, dark: false, modal: true  },
+  onboarding:     { component: Onboarding,       dark: false, modal: false },
+  home:           { component: Home,             dark: false, modal: false },
+  meds:           { component: Meds,             dark: false, modal: false },
+  ai:             { component: AIReader,         dark: false, modal: true  },
+  today:          { component: Today,            dark: false, modal: false },
+  pet:            { component: Pet,              dark: false, modal: false },
+  finance:        { component: Finance,          dark: false, modal: false },
+  lock:           { component: LockNotif,        dark: true,  modal: false },
+  calendar:       { component: Calendar,         dark: false, modal: true  },
+  notifications:  { component: Notifications,    dark: false, modal: true  },
+  petonboarding:  { component: PetOnboarding,    dark: false, modal: true  },
+  health:         { component: Health,           dark: false, modal: false },
+  examupload:     { component: ExamUpload,       dark: false, modal: true  },
+  addmedication:  { component: AddMedication,    dark: false, modal: true  },
+  behaviordiary:  { component: BehaviorDiary,    dark: false, modal: false },
+  feeding:        { component: Feeding,          dark: false, modal: false },
+  walks:          { component: WalksActivities,  dark: false, modal: false },
+  hygiene:        { component: HygieneGrooming,  dark: false, modal: false },
+  vet:            { component: VetConsultations, dark: false, modal: false },
+  documents:      { component: DocumentsLibrary, dark: false, modal: false },
+  settings:       { component: Settings,         dark: false, modal: false },
+  vaccines:       { component: Vaccines,         dark: false, modal: false },
+  reports:        { component: ReportsExport,    dark: false, modal: false },
 };
 
 export default function App() {
