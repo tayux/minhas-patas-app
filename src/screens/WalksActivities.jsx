@@ -16,6 +16,7 @@ const HISTORY = [
 export default function WalksActivities() {
   const { back } = useNav();
   const [walkMood, setWalkMood] = useState(0);
+  const [duration, setDuration] = useState('30');
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
@@ -69,8 +70,15 @@ export default function WalksActivities() {
           <div style={{ display:'flex', gap:16, alignItems:'center' }}>
             <div>
               <div style={{ fontSize:12, color:T.inkSoft, marginBottom:4 }}>Duração</div>
-              <div style={{ background:T.bgWash, borderRadius:10, padding:'9px 16px',
-                fontSize:14, fontWeight:700, color:T.ink }}>30 min</div>
+              <div style={{ background:T.bgWash, borderRadius:10, padding:'9px 12px',
+                display:'flex', alignItems:'center', gap:4 }}>
+                <input
+                  style={{ width:44, border:'none', outline:'none', background:'transparent',
+                    fontSize:14, fontWeight:700, color:T.ink, fontFamily:FONT_BODY, textAlign:'center' }}
+                  value={duration} onChange={e => setDuration(e.target.value)}
+                  inputMode="numeric" />
+                <span style={{ fontSize:12, color:T.inkSoft, fontWeight:600 }}>min</span>
+              </div>
             </div>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:12, color:T.inkSoft, marginBottom:4 }}>Humor</div>

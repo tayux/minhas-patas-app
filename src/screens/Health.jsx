@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
+import { usePet } from '../components/PetContext.jsx';
 import { Icon, I, IconBtn } from '../components/Shared.jsx';
 
 const TABS = ['Timeline','Exames','Alergias','Cirurgias'];
@@ -18,7 +19,23 @@ const EVENTS = [
 
 export default function Health() {
   const { back, nav } = useNav();
+  const { activePet } = usePet();
   const [tab, setTab] = useState('Timeline');
+  if (!activePet) return (
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
+      <div style={{ padding:'4px 24px 0', display:'flex', alignItems:'center', marginTop:8 }}>
+        <IconBtn icon={I.chevL} onClick={back} />
+      </div>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+        justifyContent:'center', gap:16, padding:32, textAlign:'center' }}>
+        <div style={{ fontSize:52 }}>🩺</div>
+        <div style={{ fontWeight:800, fontSize:18, color:T.ink, fontFamily:FONT_BODY }}>Sem histórico de saúde</div>
+        <div style={{ fontSize:14, color:T.inkSoft, fontFamily:FONT_BODY, maxWidth:260, lineHeight:1.5 }}>
+          Cadastre um pet para registrar o histórico de saúde.
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>

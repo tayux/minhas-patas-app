@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { IconBtn, I } from '../components/Shared.jsx';
@@ -10,6 +11,7 @@ const CARE = [
 
 export default function HygieneGrooming() {
   const { back } = useNav();
+  const [coatNote, setCoatNote] = useState('');
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
       <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:12 }}>
@@ -91,10 +93,12 @@ export default function HygieneGrooming() {
         <div style={{ fontSize:14, fontWeight:700, color:T.ink, marginBottom:8 }}>Pelagem & pele</div>
         <div style={{ background:T.surface, borderRadius:16, padding:16,
           boxShadow:'0 2px 8px rgba(20,20,30,0.05)', marginBottom:12 }}>
-          <div style={{ background:T.bgWash, borderRadius:12, padding:'12px 14px',
-            fontSize:14, color:T.inkSoft, minHeight:72, marginBottom:10 }}>
-            Observações sobre pelagem e pele...
-          </div>
+          <textarea
+            style={{ width:'100%', minHeight:72, background:T.bgWash, borderRadius:12,
+              padding:'12px 14px', fontSize:14, color:T.ink, fontFamily:FONT_BODY,
+              border:'none', outline:'none', resize:'none', boxSizing:'border-box', marginBottom:10 }}
+            placeholder="Observações sobre pelagem e pele..."
+            value={coatNote} onChange={e => setCoatNote(e.target.value)} />
           <div style={{ display:'flex', gap:8 }}>
             {['📷','🖼️'].map(ic => (
               <div key={ic} style={{ width:36, height:36, background:T.bgWash, borderRadius:10,

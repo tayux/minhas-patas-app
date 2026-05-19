@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
+import { usePet } from '../components/PetContext.jsx';
 import { IconBtn, I } from '../components/Shared.jsx';
 
 const HISTORY = [
@@ -10,8 +11,24 @@ const HISTORY = [
 ];
 
 export default function VetConsultations() {
-  const { back } = useNav();
+  const { back, nav } = useNav();
+  const { activePet } = usePet();
   const [tab, setTab] = useState('Histórico');
+  if (!activePet) return (
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
+      <div style={{ padding:'4px 24px 0', display:'flex', alignItems:'center', marginTop:8 }}>
+        <IconBtn icon={I.chevL} onClick={back} />
+      </div>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+        justifyContent:'center', gap:16, padding:32, textAlign:'center' }}>
+        <div style={{ fontSize:52 }}>📅</div>
+        <div style={{ fontWeight:800, fontSize:18, color:T.ink, fontFamily:FONT_BODY }}>Sem consultas registradas</div>
+        <div style={{ fontSize:14, color:T.inkSoft, fontFamily:FONT_BODY, maxWidth:260, lineHeight:1.5 }}>
+          Cadastre um pet para acompanhar as consultas veterinárias.
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
@@ -19,7 +36,7 @@ export default function VetConsultations() {
         <IconBtn icon={I.chevL} onClick={back} />
         <div style={{ fontSize:17, fontWeight:700, color:T.ink }}>Consultas veterinárias</div>
         <div style={{ flex:1 }} />
-        <button className="btn-press" style={{ border:'none', background:T.brandSoft, color:T.brand,
+        <button onClick={() => nav('addvet')} className="btn-press" style={{ border:'none', background:T.brandSoft, color:T.brand,
           borderRadius:99, padding:'6px 14px', fontSize:13, fontWeight:700,
           fontFamily:FONT_BODY, cursor:'pointer' }}>+ Agendar</button>
       </div>

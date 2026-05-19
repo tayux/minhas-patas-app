@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
+import { usePet } from '../components/PetContext.jsx';
 import { IconBtn, I } from '../components/Shared.jsx';
 
 const CATS = ['Todos','Receitas','Exames','Vacinas','Cirurgias'];
@@ -16,7 +17,23 @@ const DOCS = [
 
 export default function DocumentsLibrary() {
   const { back, nav } = useNav();
+  const { activePet } = usePet();
   const [cat, setCat] = useState('Todos');
+  if (!activePet) return (
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
+      <div style={{ padding:'4px 24px 0', display:'flex', alignItems:'center', marginTop:8 }}>
+        <IconBtn icon={I.chevL} onClick={back} />
+      </div>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+        justifyContent:'center', gap:16, padding:32, textAlign:'center' }}>
+        <div style={{ fontSize:52 }}>📁</div>
+        <div style={{ fontWeight:800, fontSize:18, color:T.ink, fontFamily:FONT_BODY }}>Nenhum documento</div>
+        <div style={{ fontSize:14, color:T.inkSoft, fontFamily:FONT_BODY, maxWidth:260, lineHeight:1.5 }}>
+          Cadastre um pet para armazenar receitas, exames e vacinas.
+        </div>
+      </div>
+    </div>
+  );
 
   const filtered = cat === 'Todos' ? DOCS : DOCS.filter(d => d.cat === cat || d.cat.toLowerCase().startsWith(cat.slice(0,-1).toLowerCase()));
 

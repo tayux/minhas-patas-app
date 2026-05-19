@@ -10,6 +10,9 @@ const TYPES = [
   { e:'🩹', l:'Tópico' },
 ];
 
+const FREQ_OPTIONS = ['1× ao dia','2× ao dia','3× ao dia','4× ao dia','A cada 8h','A cada 12h','Semanal','Quando necessário'];
+const UNIT_OPTIONS = ['mg','ml','g','comprimido','gota'];
+
 function Toggle({ on, onChange }) {
   return (
     <div onClick={() => onChange(!on)} style={{
@@ -22,12 +25,30 @@ function Toggle({ on, onChange }) {
   );
 }
 
+const inputStyle = (extra = {}) => ({
+  width:'100%', border:'none', outline:'none', background:'transparent',
+  fontSize:14, color:T.ink, fontFamily:FONT_BODY, ...extra,
+});
+
 export default function AddMedication() {
   const { back } = useNav();
-  const [step, setStep] = useState(1);
-  const [type, setType] = useState(0);
-  const [continuous, setContinuous] = useState(false);
-  const [reminders, setReminders] = useState(true);
+  const [step, setStep]         = useState(1);
+  const [type, setType]         = useState(0);
+  const [name, setName]         = useState('');
+  const [active, setActive]     = useState('');
+  const [dose, setDose]         = useState('');
+  const [unitIdx, setUnitIdx]   = useState(0);
+  const [freqIdx, setFreqIdx]   = useState(1);
+  const [startDate, setStart]   = useState('');
+  const [endDate, setEnd]       = useState('');
+  const [continuous, setCont]   = useState(false);
+  const [reminders, setRem]     = useState(true);
+  const [pushNotif, setPush]    = useState(true);
+  const [alarm, setAlarm]       = useState(false);
+  const [notes, setNotes]       = useState('');
+
+  const cycleUnit = () => setUnitIdx(i => (i + 1) % UNIT_OPTIONS.length);
+  const cycleFreq = () => setFreqIdx(i => (i + 1) % FREQ_OPTIONS.length);
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
@@ -36,7 +57,6 @@ export default function AddMedication() {
         <div style={{ fontSize:17, fontWeight:700, color:T.ink }}>Adicionar medicamento</div>
       </div>
 
-      {/* Progress */}
       <div style={{ padding:'12px 20px 0' }}>
         <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:6 }}>
           <span style={{ fontSize:11, fontWeight:600, color:T.inkSoft }}>Passo {step} de 2</span>
@@ -50,21 +70,23 @@ export default function AddMedication() {
         {step === 1 && (
           <div style={{ background:T.surface, borderRadius:20, padding:20,
             boxShadow:'0 4px 20px rgba(20,20,30,0.07)', display:'flex', flexDirection:'column', gap:18 }}>
-            {/* Name */}
+
             <div>
               <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:6 }}>Nome do medicamento</div>
-              <div style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px', fontSize:14, color:T.inkSoft }}>
-                Ex: Prednisolona, Amoxicilina...
-              </div>
-            </div>
-            <div>
-              <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:6 }}>Princípio ativo (opcional)</div>
-              <div style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px', fontSize:14, color:T.inkSoft }}>
-                Buscar princípio ativo...
+              <div style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px' }}>
+                <input style={inputStyle()} placeholder="Ex: Prednisolona, Amoxicilina..."
+                  value={name} onChange={e => setName(e.target.value)} autoFocus />
               </div>
             </div>
 
-            {/* Type */}
+            <div>
+              <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:6 }}>Princípio ativo (opcional)</div>
+              <div style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px' }}>
+                <input style={inputStyle()} placeholder="Buscar princípio ativo..."
+                  value={active} onChange={e => setActive(e.target.value)} />
+              </div>
+            </div>
+
             <div>
               <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:8 }}>Tipo</div>
               <div style={{ display:'flex', gap:6, background:T.bgWash, borderRadius:16, padding:3 }}>
@@ -83,45 +105,46 @@ export default function AddMedication() {
               </div>
             </div>
 
-            {/* Dose */}
             <div>
               <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:6 }}>Dose</div>
               <div style={{ display:'flex', gap:10 }}>
-                <div style={{ flex:1, background:T.bgWash, borderRadius:14, padding:'13px 16px',
-                  fontSize:18, fontWeight:700, color:T.ink }}>10</div>
-                <div style={{ width:80, background:T.brandSoft, borderRadius:14, padding:'13px 0',
-                  textAlign:'center', fontSize:14, fontWeight:700, color:T.brand }}>mg  ›</div>
+                <div style={{ flex:1, background:T.bgWash, borderRadius:14, padding:'13px 16px' }}>
+                  <input style={inputStyle({ fontSize:18, fontWeight:700 })}
+                    placeholder="0" value={dose} onChange={e => setDose(e.target.value)} inputMode="decimal" />
+                </div>
+                <div onClick={cycleUnit} style={{ minWidth:80, background:T.brandSoft, borderRadius:14,
+                  padding:'13px 0', textAlign:'center', fontSize:14, fontWeight:700,
+                  color:T.brand, cursor:'pointer' }}>{UNIT_OPTIONS[unitIdx]}  ›</div>
               </div>
             </div>
 
-            {/* Frequency */}
             <div>
               <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:6 }}>Frequência</div>
-              <div style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px',
-                display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                <span style={{ fontSize:14, fontWeight:600, color:T.ink }}>2× ao dia</span>
+              <div onClick={cycleFreq} style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px',
+                display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer' }}>
+                <span style={{ fontSize:14, fontWeight:600, color:T.ink }}>{FREQ_OPTIONS[freqIdx]}</span>
                 <Icon d={I.chevR} size={16} color={T.inkSoft} />
               </div>
             </div>
 
-            {/* Duration */}
             <div>
               <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:6 }}>Duração do tratamento</div>
               <div style={{ display:'flex', gap:10 }}>
-                {[{l:'📅 Início',v:'14/05/2025'},{l:'📅 Fim',v:'28/05/2025'}].map(d => (
+                {[{l:'📅 Início', v:startDate, set:setStart},{l:'📅 Fim', v:endDate, set:setEnd}].map(d => (
                   <div key={d.l} style={{ flex:1, background:T.bgWash, borderRadius:14, padding:'10px 14px' }}>
-                    <div style={{ fontSize:11, color:T.inkSoft }}>{d.l}</div>
-                    <div style={{ fontSize:14, fontWeight:700, color:T.ink, marginTop:2 }}>{d.v}</div>
+                    <div style={{ fontSize:11, color:T.inkSoft, marginBottom:4 }}>{d.l}</div>
+                    <input style={inputStyle({ fontSize:13, fontWeight:700 })}
+                      placeholder="dd/mm/aaaa" value={d.v} onChange={e => d.set(e.target.value)}
+                      inputMode="numeric" />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Continuous */}
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center',
               background:T.bgWash, borderRadius:14, padding:'13px 16px' }}>
               <span style={{ fontSize:14, fontWeight:600, color:T.ink }}>Uso contínuo</span>
-              <Toggle on={continuous} onChange={setContinuous} />
+              <Toggle on={continuous} onChange={setCont} />
             </div>
           </div>
         )}
@@ -145,15 +168,15 @@ export default function AddMedication() {
               boxShadow:'0 4px 20px rgba(20,20,30,0.07)' }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
                 <span style={{ fontSize:14, fontWeight:700, color:T.ink }}>🔔  Lembretes</span>
-                <Toggle on={reminders} onChange={setReminders} />
+                <Toggle on={reminders} onChange={setRem} />
               </div>
               {reminders && (
                 <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                  {[{l:'Notificação push',on:true},{l:'Alarme sonoro',on:false}].map((r,i) => (
+                  {[{l:'Notificação push', on:pushNotif, set:setPush},{l:'Alarme sonoro', on:alarm, set:setAlarm}].map((r,i) => (
                     <div key={i} style={{ display:'flex', justifyContent:'space-between',
                       alignItems:'center', padding:'10px 14px', background:T.bgWash, borderRadius:12 }}>
                       <span style={{ fontSize:13, fontWeight:600, color:T.ink }}>{r.l}</span>
-                      <Toggle on={r.on} onChange={() => {}} />
+                      <Toggle on={r.on} onChange={r.set} />
                     </div>
                   ))}
                 </div>
@@ -163,8 +186,12 @@ export default function AddMedication() {
             <div style={{ background:T.surface, borderRadius:20, padding:20,
               boxShadow:'0 4px 20px rgba(20,20,30,0.07)' }}>
               <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:6 }}>Instruções especiais</div>
-              <div style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px', minHeight:80,
-                fontSize:14, color:T.inkSoft }}>Ex: Dar com comida, não partir...</div>
+              <textarea
+                style={{ width:'100%', minHeight:80, background:T.bgWash, borderRadius:14,
+                  padding:'13px 16px', fontSize:14, color:T.ink, fontFamily:FONT_BODY,
+                  border:'none', outline:'none', resize:'none', boxSizing:'border-box' }}
+                placeholder="Ex: Dar com comida, não partir..."
+                value={notes} onChange={e => setNotes(e.target.value)} />
             </div>
           </div>
         )}

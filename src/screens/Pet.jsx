@@ -1,9 +1,24 @@
 import { T, FONT_DISPLAY, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
+import { usePet } from '../components/PetContext.jsx';
 import { Icon, I, Card, EmojiCircle, IconBtn, Mascot, Eyebrow, Display, BottomNav } from '../components/Shared.jsx';
 
 export default function Pet() {
   const { nav, back } = useNav();
+  const { activePet } = usePet();
+  if (!activePet) return (
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+        justifyContent:'center', gap:16, padding:32, textAlign:'center' }}>
+        <div style={{ fontSize:52 }}>🐾</div>
+        <div style={{ fontWeight:800, fontSize:18, color:T.ink, fontFamily:FONT_BODY }}>Nenhum pet cadastrado</div>
+        <div style={{ fontSize:14, color:T.inkSoft, fontFamily:FONT_BODY, maxWidth:260, lineHeight:1.5 }}>
+          Adicione seu primeiro pet para ver o perfil completo aqui.
+        </div>
+      </div>
+      <BottomNav active="pet" />
+    </div>
+  );
   const rows = [
     { label:'Histórico de saúde',     emoji:'❤️', tint:T.tintRose,     meta:'12 registros',      to:'health' },
     { label:'Medicamentos ativos',    emoji:'💊', tint:T.tintLavender, meta:'5 ativos', dot:true, to:'meds' },
@@ -24,19 +39,19 @@ export default function Pet() {
         justifyContent:'space-between', marginTop:8, position:'relative' }}>
         <IconBtn icon={I.chevL} onClick={back} />
         <div style={{ display:'flex', gap:8 }}>
-          <IconBtn icon={I.bell} />
-          <IconBtn icon={I.more} />
+          <IconBtn icon={I.bell} onClick={() => nav('notifications')} />
+          <IconBtn icon={I.more} onClick={() => nav('settings')} />
         </div>
       </div>
       <div style={{ flex:1, overflowY:'auto', padding:'16px 24px 24px', position:'relative' }}>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', marginTop:8 }}>
           <Mascot size={150} />
-          <Eyebrow style={{ marginTop:12 }}>fêmea · castrada · SRD</Eyebrow>
+          <Eyebrow style={{ marginTop:12 }}>{activePet.gender} · {activePet.breed}</Eyebrow>
           <Display size={52} weight={400} style={{ marginTop:6 }}>
-            <span style={{ fontStyle:'italic' }}>Leia</span>
+            <span style={{ fontStyle:'italic' }}>{activePet.name}</span>
           </Display>
           <div style={{ display:'flex', gap:8, marginTop:18 }}>
-            {[{l:'8',u:'anos',k:'idade'},{l:'12.3',u:'kg',k:'peso'},{l:'2018',u:'',k:'nascimento'}].map((c,i) => (
+            {[{l:activePet.age.replace(' anos',''),u:'anos',k:'idade'},{l:activePet.weight.replace(' kg',''),u:'kg',k:'peso'}].map((c,i) => (
               <div key={i} style={{ padding:'10px 16px', borderRadius:16, background:T.surface,
                 textAlign:'center', minWidth:70,
                 boxShadow:'0 1px 2px rgba(20,20,30,0.04), 0 6px 16px -10px rgba(20,20,30,0.10)' }}>
@@ -67,7 +82,7 @@ export default function Pet() {
             </div>
           ))}
         </Card>
-        <button style={{ marginTop:14, width:'100%', height:52, borderRadius:99,
+        <button onClick={() => nav('petonboarding')} style={{ marginTop:14, width:'100%', height:52, borderRadius:99,
           background:T.surface, color:T.ink, border:'none', fontFamily:FONT_BODY,
           fontSize:14, fontWeight:600, display:'flex', alignItems:'center',
           justifyContent:'center', gap:8, cursor:'pointer',

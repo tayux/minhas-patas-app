@@ -66,16 +66,6 @@ export default function Onboarding() {
           <GoogleG size={18} />
           {loading ? 'Entrando…' : 'Continuar com Google'}
         </button>
-        <button onClick={() => nav('home')} style={{ height:56, borderRadius:99, border:'none',
-          background:T.ink, color:'#fff', fontFamily:FONT_BODY, fontSize:15, fontWeight:600,
-          display:'flex', alignItems:'center', justifyContent:'center', gap:10, cursor:'pointer' }}>
-          <Icon d={I.mail} size={16} color="#fff" stroke={2} /> Continuar com e-mail
-        </button>
-        <div style={{ textAlign:'center', fontSize:13, color:T.inkMute, marginTop:10 }}>
-          Já tem conta?{' '}
-          <span onClick={() => nav('home')} style={{ color:T.ink, fontWeight:600,
-            textDecoration:'underline', cursor:'pointer' }}>Entrar</span>
-        </div>
       </div>
     </div>
   );

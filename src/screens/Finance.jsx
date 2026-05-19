@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { T, FONT_DISPLAY, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
+import { usePet } from '../components/PetContext.jsx';
 import { Icon, I, Card, EmojiCircle, SectionPill, IconBtn, Eyebrow, Display, BottomNav } from '../components/Shared.jsx';
 
 const MONTHS = [
@@ -62,7 +63,21 @@ function BarChart({ months, selectedKey, peak, onSelect }) {
 }
 
 export default function Finance() {
-  const { back } = useNav();
+  const { back, nav } = useNav();
+  const { activePet } = usePet();
+  if (!activePet) return (
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+        justifyContent:'center', gap:16, padding:32, textAlign:'center' }}>
+        <div style={{ fontSize:52 }}>💰</div>
+        <div style={{ fontWeight:800, fontSize:18, color:T.ink, fontFamily:FONT_BODY }}>Sem dados financeiros</div>
+        <div style={{ fontSize:14, color:T.inkSoft, fontFamily:FONT_BODY, maxWidth:260, lineHeight:1.5 }}>
+          Adicione um pet para começar a registrar os gastos.
+        </div>
+      </div>
+      <BottomNav active="finance" />
+    </div>
+  );
   const [selectedKey, setSelectedKey] = useState('mai');
   const selected = MONTHS.find(m => m.key === selectedKey);
   const prevIdx  = MONTHS.findIndex(m => m.key === selectedKey) - 1;
@@ -210,13 +225,13 @@ export default function Finance() {
           ))}
         </Card>
         <div style={{ display:'flex', gap:10, marginTop:18 }}>
-          <button style={{ flex:1, height:52, borderRadius:99, background:T.surface, color:T.ink,
+          <button onClick={() => nav('reports')} style={{ flex:1, height:52, borderRadius:99, background:T.surface, color:T.ink,
             border:'none', fontFamily:FONT_BODY, fontSize:14, fontWeight:600, cursor:'pointer',
             display:'flex', alignItems:'center', justifyContent:'center', gap:6,
             boxShadow:'0 1px 2px rgba(20,20,30,0.04)' }}>
             <Icon d={I.download} size={16} color={T.ink} stroke={2} /> Exportar PDF
           </button>
-          <button style={{ flex:1.2, height:52, borderRadius:99, background:T.ink, color:'#fff',
+          <button onClick={() => nav('addexpense')} style={{ flex:1.2, height:52, borderRadius:99, background:T.ink, color:'#fff',
             border:'none', fontFamily:FONT_BODY, fontSize:14, fontWeight:600, cursor:'pointer',
             display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
             <Icon d={I.plus} size={16} color="#fff" stroke={2.4} /> Adicionar gasto

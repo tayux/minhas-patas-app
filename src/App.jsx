@@ -28,6 +28,9 @@ import DocumentsLibrary from './screens/DocumentsLibrary.jsx';
 import Settings         from './screens/Settings.jsx';
 import Vaccines         from './screens/Vaccines.jsx';
 import ReportsExport    from './screens/ReportsExport.jsx';
+import AddExpense       from './screens/AddExpense.jsx';
+import AddVaccine       from './screens/AddVaccine.jsx';
+import AddVetConsultation from './screens/AddVetConsultation.jsx';
 
 const SCREENS = {
   onboarding:     { component: Onboarding,       dark: false, modal: false },
@@ -53,6 +56,9 @@ const SCREENS = {
   settings:       { component: Settings,         dark: false, modal: false },
   vaccines:       { component: Vaccines,         dark: false, modal: false },
   reports:        { component: ReportsExport,    dark: false, modal: false },
+  addexpense:     { component: AddExpense,        dark: false, modal: true  },
+  addvaccine:     { component: AddVaccine,        dark: false, modal: true  },
+  addvet:         { component: AddVetConsultation,dark: false, modal: true  },
 };
 
 export default function App() {

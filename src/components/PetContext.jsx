@@ -99,10 +99,12 @@ async function ensureUser() {
   let userId = localStorage.getItem('mp_user_id');
   if (userId) return userId;
 
+  const storedUser = JSON.parse(localStorage.getItem('mp_google_user') || 'null');
+  const name = storedUser?.name || 'Usuário';
   const res = await fetch('/api/users', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'Taynara', avatar_hue: 28 }),
+    body: JSON.stringify({ name, avatar_hue: 28 }),
   });
   if (!res.ok) throw new Error('Falha ao criar usuário');
   const user = await res.json();
@@ -110,12 +112,14 @@ async function ensureUser() {
   return user.id;
 }
 
+const isAuthenticated = () => !!localStorage.getItem('mp_google_user');
+
 export const PETS = PETS_FALLBACK;
 
 export const PetCtx = createContext({
-  activePet: PETS_FALLBACK[0],
+  activePet: null,
   setActivePetId: () => {},
-  PETS: PETS_FALLBACK,
+  PETS: [],
   userId: null,
   loading: false,
   addPet: async () => {},
@@ -125,8 +129,9 @@ export const PetCtx = createContext({
 export const usePet = () => useContext(PetCtx);
 
 export function PetProvider({ children }) {
-  const [pets, setPets]             = useState(PETS_FALLBACK);
-  const [activePetId, setActivePetId] = useState(PETS_FALLBACK[0].id);
+  const authenticated = isAuthenticated();
+  const [pets, setPets]             = useState(authenticated ? [] : PETS_FALLBACK);
+  const [activePetId, setActivePetId] = useState(authenticated ? null : PETS_FALLBACK[0].id);
   const [userId, setUserId]         = useState(null);
   const [loading, setLoading]       = useState(true);
 

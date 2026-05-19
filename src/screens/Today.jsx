@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { T, FONT_BODY, FONT_DISPLAY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
+import { usePet } from '../components/PetContext.jsx';
 import { Icon, I, Card, EmojiCircle, SectionPill, CheckBubble, IconBtn, Display, BottomNav } from '../components/Shared.jsx';
 
 const DAYS = [
@@ -79,6 +80,20 @@ function TaskRow({ emoji, tint, time, title, sub, done, late, onToggle }) {
 
 export default function Today() {
   const { nav } = useNav();
+  const { activePet } = usePet();
+  if (!activePet) return (
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+        justifyContent:'center', gap:16, padding:32, textAlign:'center' }}>
+        <div style={{ fontSize:52 }}>📅</div>
+        <div style={{ fontWeight:800, fontSize:18, color:T.ink, fontFamily:FONT_BODY }}>Nenhuma agenda ainda</div>
+        <div style={{ fontSize:14, color:T.inkSoft, fontFamily:FONT_BODY, maxWidth:260, lineHeight:1.5 }}>
+          Adicione um pet para ver a rotina diária aqui.
+        </div>
+      </div>
+      <BottomNav active="today" />
+    </div>
+  );
   const [dayIdx, setDayIdx] = useState(TODAY_IDX);
   const [allEvents, setAllEvents] = useState(() =>
     DAYS.map(d => ({ ...d, events: d.events.map(e => ({ ...e })) }))
@@ -112,7 +127,7 @@ export default function Today() {
         </div>
         <div style={{ display:'flex', gap:8 }}>
           <IconBtn icon={I.cal} className="btn-press" onClick={() => nav('calendar')} />
-          <IconBtn icon={I.plus} className="btn-press" />
+          <IconBtn icon={I.plus} className="btn-press" onClick={() => nav('addmedication')} />
         </div>
       </div>
 

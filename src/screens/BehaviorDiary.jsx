@@ -12,6 +12,7 @@ export default function BehaviorDiary() {
   const [mood, setMood] = useState(3);
   const [appetite, setAppetite] = useState(1);
   const [selected, setSelected] = useState(new Set([0, 2]));
+  const [note, setNote] = useState('');
 
   const toggleBehavior = i => {
     const s = new Set(selected);
@@ -93,14 +94,12 @@ export default function BehaviorDiary() {
           {/* Note */}
           <div style={{ marginBottom:18 }}>
             <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:8 }}>Observações</div>
-            <div style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px', minHeight:88,
-              fontSize:14, color:T.inkSoft }}>Escreva uma nota livre...</div>
-            <div style={{ display:'flex', gap:8, marginTop:10 }}>
-              {['📷','🖼️','🎙️'].map(ic => (
-                <div key={ic} style={{ width:36, height:36, background:T.bgWash, borderRadius:10,
-                  display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, cursor:'pointer' }}>{ic}</div>
-              ))}
-            </div>
+            <textarea
+              style={{ width:'100%', minHeight:88, background:T.bgWash, borderRadius:14,
+                padding:'13px 16px', fontSize:14, color:T.ink, fontFamily:FONT_BODY,
+                border:'none', outline:'none', resize:'none', boxSizing:'border-box' }}
+              placeholder="Escreva uma nota livre..."
+              value={note} onChange={e => setNote(e.target.value)} />
           </div>
 
           <div style={{ height:1, background:T.hairline, marginBottom:18 }} />
