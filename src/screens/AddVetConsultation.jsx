@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
+import { usePet } from '../components/PetContext.jsx';
 import { IconBtn, I } from '../components/Shared.jsx';
+import { maskDate, maskTime } from '../utils/dateUtils.js';
 
 const inputStyle = {
   width:'100%', border:'none', outline:'none', background:'transparent',
@@ -10,11 +12,25 @@ const inputStyle = {
 
 export default function AddVetConsultation() {
   const { back } = useNav();
+  const { addConsultation } = usePet();
   const [vet, setVet]       = useState('');
   const [clinic, setClinic] = useState('');
   const [date, setDate]     = useState('');
   const [time, setTime]     = useState('');
   const [reason, setReason] = useState('');
+
+  const handleSave = () => {
+    if (vet.trim() || date) {
+      addConsultation({
+        vet: vet.trim(),
+        clinic: clinic.trim(),
+        date,
+        time,
+        reason: reason.trim(),
+      });
+    }
+    back();
+  };
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
@@ -55,7 +71,7 @@ export default function AddVetConsultation() {
                 display:'flex', alignItems:'center', gap:6 }}>
                 <span>📅</span>
                 <input style={{ ...inputStyle, fontSize:13 }} placeholder="dd/mm/aaaa"
-                  value={date} onChange={e => setDate(e.target.value)} inputMode="numeric" />
+                  value={date} onChange={e => setDate(maskDate(e.target.value))} inputMode="numeric" />
               </div>
             </div>
             <div style={{ flex:1 }}>
@@ -64,7 +80,7 @@ export default function AddVetConsultation() {
                 display:'flex', alignItems:'center', gap:6 }}>
                 <span>🕐</span>
                 <input style={{ ...inputStyle, fontSize:13 }} placeholder="hh:mm"
-                  value={time} onChange={e => setTime(e.target.value)} inputMode="numeric" />
+                  value={time} onChange={e => setTime(maskTime(e.target.value))} inputMode="numeric" />
               </div>
             </div>
           </div>
@@ -83,7 +99,7 @@ export default function AddVetConsultation() {
 
       <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'12px 20px 28px',
         background:`linear-gradient(to top, ${T.bg} 80%, transparent)` }}>
-        <button onClick={back} className="btn-press" style={{
+        <button onClick={handleSave} className="btn-press" style={{
           width:'100%', height:52, borderRadius:100, border:'none',
           background:T.brand, color:'#fff', fontSize:16, fontWeight:700,
           fontFamily:FONT_BODY, cursor:'pointer' }}>

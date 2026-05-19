@@ -1,28 +1,24 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
-// Dados locais usados como fallback enquanto a API carrega
 const PETS_FALLBACK = [
   {
     id: 'leia',
     name: 'Leia',
     hue: 30,
-    photo: true,
+    photo: false,
     age: '8 anos',
     weight: '12.3 kg',
     breed: 'SRD',
     gender: 'fêmea · castrada',
     tiles: [
       { label:'Saúde',        emoji:'🩺', sub:'em dia'      },
-      { label:'Medicamentos', emoji:'💊', sub:'5 ativos'    },
-      { label:'Finanças',     emoji:'🪙', sub:'R$ 1.247'    },
+      { label:'Medicamentos', emoji:'💊', sub:'ver lista'   },
+      { label:'Finanças',     emoji:'🪙', sub:'ver gastos'  },
       { label:'Documentos',   emoji:'📁', sub:'8 itens'     },
     ],
-    upcoming: [
-      { time:'15:00', emoji:'💊', title:'Prednisolona', sub:'10mg · após o almoço', late:false },
-      { time:'17:30', emoji:'🚶', title:'Passeio da tarde', sub:'20 min · Leia', late:true },
-    ],
-    medsCount: 5,
-    nextDose: '15:00',
+    upcoming: [],
+    medsCount: 0,
+    nextDose: '—',
   },
   {
     id: 'filo',
@@ -34,17 +30,14 @@ const PETS_FALLBACK = [
     breed: 'Poodle',
     gender: 'fêmea · castrada',
     tiles: [
-      { label:'Saúde',        emoji:'🩺', sub:'consulta pendente' },
-      { label:'Medicamentos', emoji:'💊', sub:'2 ativos'          },
-      { label:'Finanças',     emoji:'🪙', sub:'R$ 380'            },
-      { label:'Documentos',   emoji:'📁', sub:'3 itens'           },
+      { label:'Saúde',        emoji:'🩺', sub:'ver registros' },
+      { label:'Medicamentos', emoji:'💊', sub:'ver lista'     },
+      { label:'Finanças',     emoji:'🪙', sub:'ver gastos'    },
+      { label:'Documentos',   emoji:'📁', sub:'3 itens'       },
     ],
-    upcoming: [
-      { time:'08:00', emoji:'💊', title:'Vermífugo', sub:'1 comprimido', late:false },
-      { time:'14:00', emoji:'🐾', title:'Consulta veterinária', sub:'Dr. Renata · clínica', late:false },
-    ],
-    medsCount: 2,
-    nextDose: '08:00',
+    upcoming: [],
+    medsCount: 0,
+    nextDose: '—',
   },
   {
     id: 'fiapa',
@@ -56,28 +49,31 @@ const PETS_FALLBACK = [
     breed: 'Labrador mix',
     gender: 'fêmea · não castrada',
     tiles: [
-      { label:'Saúde',        emoji:'🩺', sub:'vacinação pendente' },
-      { label:'Medicamentos', emoji:'💊', sub:'sem ativos'         },
-      { label:'Finanças',     emoji:'🪙', sub:'R$ 620'             },
-      { label:'Documentos',   emoji:'📁', sub:'5 itens'            },
+      { label:'Saúde',        emoji:'🩺', sub:'ver registros' },
+      { label:'Medicamentos', emoji:'💊', sub:'ver lista'     },
+      { label:'Finanças',     emoji:'🪙', sub:'ver gastos'    },
+      { label:'Documentos',   emoji:'📁', sub:'5 itens'       },
     ],
-    upcoming: [
-      { time:'09:00', emoji:'🥣', title:'Café da manhã', sub:'Ração premium 120g', late:false },
-      { time:'16:00', emoji:'🚶', title:'Passeio longo', sub:'45 min · parque', late:false },
-    ],
+    upcoming: [],
     medsCount: 0,
     nextDose: '—',
   },
 ];
 
-// Converte o pet do banco para o formato esperado pelos componentes
 function dbPetToUi(p) {
+  const photoUrl = localStorage.getItem(`pet_photo_${p.id}`) || null;
+  let age = '—';
+  if (p.birth_year) {
+    const years = new Date().getFullYear() - p.birth_year;
+    age = `${years} ${years === 1 ? 'ano' : 'anos'}`;
+  }
   return {
     id: p.id,
     name: p.name,
     hue: p.hue ?? 270,
-    photo: !!p.photo_url,
-    age: p.birth_year ? `${new Date().getFullYear() - p.birth_year} anos` : '—',
+    photo: !!photoUrl,
+    photoUrl,
+    age,
     weight: p.weight_kg ? `${p.weight_kg} kg` : '—',
     breed: p.breed || 'SRD',
     gender: `${p.sex === 'male' ? 'macho' : 'fêmea'} · ${p.neutered ? 'castrado(a)' : 'não castrado(a)'}`,
@@ -94,7 +90,6 @@ function dbPetToUi(p) {
   };
 }
 
-// Garante que o usuário local existe no banco; cria se necessário
 async function ensureUser() {
   let userId = localStorage.getItem('mp_user_id');
   if (userId) return userId;
@@ -114,6 +109,11 @@ async function ensureUser() {
 
 const isAuthenticated = () => !!localStorage.getItem('mp_google_user');
 
+function loadPetData() {
+  try { return JSON.parse(localStorage.getItem('mp_pet_data') || '{}'); }
+  catch { return {}; }
+}
+
 export const PETS = PETS_FALLBACK;
 
 export const PetCtx = createContext({
@@ -124,16 +124,36 @@ export const PetCtx = createContext({
   loading: false,
   addPet: async () => {},
   updatePet: async () => {},
+  medications: [],
+  addMedication: () => {},
+  vaccines: [],
+  addVaccine: () => {},
+  expenses: [],
+  addExpense: () => {},
+  consultations: [],
+  addConsultation: () => {},
+  hygieneRecords: [],
+  addHygieneRecord: () => {},
+  feedingConfig: null,
+  setFeedingConfig: () => {},
+  todayTasks: [],
+  setTodayTasks: () => {},
 });
 
 export const usePet = () => useContext(PetCtx);
 
 export function PetProvider({ children }) {
   const authenticated = isAuthenticated();
-  const [pets, setPets]             = useState(authenticated ? [] : PETS_FALLBACK);
+  const [pets, setPets]               = useState(authenticated ? [] : PETS_FALLBACK);
   const [activePetId, setActivePetId] = useState(authenticated ? null : PETS_FALLBACK[0].id);
-  const [userId, setUserId]         = useState(null);
-  const [loading, setLoading]       = useState(true);
+  const [userId, setUserId]           = useState(null);
+  const [loading, setLoading]         = useState(true);
+  const [petData, setPetDataState]    = useState(loadPetData);
+
+  const savePetData = (newData) => {
+    setPetDataState(newData);
+    try { localStorage.setItem('mp_pet_data', JSON.stringify(newData)); } catch(e) {}
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -152,6 +172,10 @@ export function PetProvider({ children }) {
           const uiPets = dbPets.map(dbPetToUi);
           setPets(uiPets);
           setActivePetId(uiPets[0].id);
+        } else if (authenticated) {
+          // Authenticated but no pets yet — show empty state
+          setPets([]);
+          setActivePetId(null);
         }
       } catch (err) {
         console.warn('API indisponível, usando dados locais:', err.message);
@@ -171,6 +195,12 @@ export function PetProvider({ children }) {
     if (!res.ok) throw new Error('Falha ao criar pet');
     const newPet = await res.json();
     const uiPet = dbPetToUi(newPet);
+    // Save photo to localStorage if provided
+    if (petData.photoDataUrl) {
+      localStorage.setItem(`pet_photo_${newPet.id}`, petData.photoDataUrl);
+      uiPet.photo = true;
+      uiPet.photoUrl = petData.photoDataUrl;
+    }
     setPets(prev => [...prev, uiPet]);
     return uiPet;
   };
@@ -188,10 +218,54 @@ export function PetProvider({ children }) {
     return uiPet;
   };
 
-  const activePet = pets.find(p => p.id === activePetId) || pets[0];
+  const activePet = pets.find(p => p.id === activePetId) || (pets.length > 0 ? pets[0] : null);
+  const pid = activePet?.id;
+
+  // Per-pet data helpers
+  const getList = (key) => (pid ? (petData[pid]?.[key] || []) : []);
+  const addToList = (key, item) => {
+    if (!pid) return;
+    const newItem = { ...item, id: String(Date.now()), createdAt: new Date().toISOString() };
+    const updated = {
+      ...petData,
+      [pid]: { ...petData[pid], [key]: [newItem, ...(petData[pid]?.[key] || [])] },
+    };
+    savePetData(updated);
+    return newItem;
+  };
+  const setForPet = (key, value) => {
+    if (!pid) return;
+    const updated = { ...petData, [pid]: { ...petData[pid], [key]: value } };
+    savePetData(updated);
+  };
+
+  const medications    = getList('medications');
+  const addMedication  = (med) => addToList('medications', med);
+  const vaccines       = getList('vaccines');
+  const addVaccine     = (vac) => addToList('vaccines', vac);
+  const expenses       = getList('expenses');
+  const addExpense     = (exp) => addToList('expenses', exp);
+  const consultations  = getList('consultations');
+  const addConsultation = (con) => addToList('consultations', con);
+  const hygieneRecords = getList('hygieneRecords');
+  const addHygieneRecord = (rec) => addToList('hygieneRecords', rec);
+  const feedingConfig  = pid ? (petData[pid]?.feedingConfig || null) : null;
+  const setFeedingConfig = (config) => setForPet('feedingConfig', config);
+  const todayTasks     = getList('todayTasks');
+  const setTodayTasks  = (tasks) => setForPet('todayTasks', tasks);
 
   return (
-    <PetCtx.Provider value={{ activePet, setActivePetId, PETS: pets, userId, loading, addPet, updatePet }}>
+    <PetCtx.Provider value={{
+      activePet, setActivePetId, PETS: pets, userId, loading,
+      addPet, updatePet,
+      medications, addMedication,
+      vaccines, addVaccine,
+      expenses, addExpense,
+      consultations, addConsultation,
+      hygieneRecords, addHygieneRecord,
+      feedingConfig, setFeedingConfig,
+      todayTasks, setTodayTasks,
+    }}>
       {children}
     </PetCtx.Provider>
   );

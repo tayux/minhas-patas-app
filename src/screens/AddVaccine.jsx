@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
+import { usePet } from '../components/PetContext.jsx';
 import { IconBtn, I } from '../components/Shared.jsx';
+import { maskDate } from '../utils/dateUtils.js';
 
 const inputStyle = {
   width:'100%', border:'none', outline:'none', background:'transparent',
@@ -10,11 +12,19 @@ const inputStyle = {
 
 export default function AddVaccine() {
   const { back } = useNav();
+  const { addVaccine } = usePet();
   const [name, setName]       = useState('');
   const [date, setDate]       = useState('');
   const [nextDate, setNext]   = useState('');
   const [lot, setLot]         = useState('');
   const [vet, setVet]         = useState('');
+
+  const handleSave = () => {
+    if (name.trim()) {
+      addVaccine({ name: name.trim(), date, nextDate, lot: lot.trim(), vet: vet.trim() });
+    }
+    back();
+  };
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
@@ -45,8 +55,8 @@ export default function AddVaccine() {
             <div style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px',
               display:'flex', alignItems:'center', gap:8 }}>
               <span>📅</span>
-              <input style={inputStyle} placeholder="dd / mm / aaaa"
-                value={date} onChange={e => setDate(e.target.value)} inputMode="numeric" />
+              <input style={inputStyle} placeholder="dd/mm/aaaa"
+                value={date} onChange={e => setDate(maskDate(e.target.value))} inputMode="numeric" />
             </div>
           </div>
 
@@ -55,8 +65,8 @@ export default function AddVaccine() {
             <div style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px',
               display:'flex', alignItems:'center', gap:8 }}>
               <span>📅</span>
-              <input style={inputStyle} placeholder="dd / mm / aaaa"
-                value={nextDate} onChange={e => setNext(e.target.value)} inputMode="numeric" />
+              <input style={inputStyle} placeholder="dd/mm/aaaa"
+                value={nextDate} onChange={e => setNext(maskDate(e.target.value))} inputMode="numeric" />
             </div>
           </div>
 
@@ -80,7 +90,7 @@ export default function AddVaccine() {
 
       <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'12px 20px 28px',
         background:`linear-gradient(to top, ${T.bg} 80%, transparent)` }}>
-        <button onClick={back} className="btn-press" style={{
+        <button onClick={handleSave} className="btn-press" style={{
           width:'100%', height:52, borderRadius:100, border:'none',
           background:T.brand, color:'#fff', fontSize:16, fontWeight:700,
           fontFamily:FONT_BODY, cursor:'pointer' }}>

@@ -4,16 +4,11 @@ import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
 import { IconBtn, I } from '../components/Shared.jsx';
 
-const HISTORY = [
-  { date:'12 abr 2025', vet:'Dr. Renata', diag:'Dermatite atópica · tratamento ativo', cost:'R$ 280', chips:['Receita.pdf'] },
-  { date:'10 jan 2025', vet:'Dr. Carlos', diag:'Check-up anual · sem alterações', cost:'R$ 160', chips:['Exame.pdf','Relat.pdf'] },
-  { date:'05 set 2024', vet:'Dr. Renata', diag:'Infecção urinária · antibiótico 7d', cost:'R$ 220', chips:['Receita.pdf'] },
-];
-
 export default function VetConsultations() {
   const { back, nav } = useNav();
-  const { activePet } = usePet();
+  const { activePet, consultations } = usePet();
   const [tab, setTab] = useState('Histórico');
+
   if (!activePet) return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
       <div style={{ padding:'4px 24px 0', display:'flex', alignItems:'center', marginTop:8 }}>
@@ -30,48 +25,90 @@ export default function VetConsultations() {
     </div>
   );
 
+  if (consultations.length === 0) return (
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
+      <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:12 }}>
+        <IconBtn icon={I.chevL} onClick={back} />
+        <div style={{ fontSize:17, fontWeight:700, color:T.ink }}>Consultas veterinárias</div>
+        <div style={{ flex:1 }} />
+        <button onClick={() => nav('addvet')} className="btn-press" style={{
+          border:'none', background:T.brandSoft, color:T.brand,
+          borderRadius:99, padding:'6px 14px', fontSize:13, fontWeight:700,
+          fontFamily:FONT_BODY, cursor:'pointer' }}>+ Agendar</button>
+      </div>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+        justifyContent:'center', gap:16, padding:32, textAlign:'center' }}>
+        <div style={{ fontSize:64 }}>🩺</div>
+        <div style={{ fontWeight:800, fontSize:18, color:T.ink, fontFamily:FONT_BODY }}>
+          Nenhuma consulta registrada
+        </div>
+        <div style={{ fontSize:14, color:T.inkSoft, fontFamily:FONT_BODY, maxWidth:260, lineHeight:1.5 }}>
+          Agende e registre as consultas do seu pet para nunca perder um retorno ou check-up.
+        </div>
+        <button onClick={() => nav('addvet')} style={{
+          marginTop:8, padding:'12px 28px', borderRadius:99,
+          background:T.brand, color:'#fff', border:'none',
+          fontSize:15, fontWeight:700, fontFamily:FONT_BODY, cursor:'pointer' }}>
+          + Agendar primeira consulta
+        </button>
+      </div>
+    </div>
+  );
+
+  const sorted = [...consultations].sort((a, b) =>
+    new Date(b.createdAt) - new Date(a.createdAt)
+  );
+  const next = sorted[0];
+
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
       <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:12 }}>
         <IconBtn icon={I.chevL} onClick={back} />
         <div style={{ fontSize:17, fontWeight:700, color:T.ink }}>Consultas veterinárias</div>
         <div style={{ flex:1 }} />
-        <button onClick={() => nav('addvet')} className="btn-press" style={{ border:'none', background:T.brandSoft, color:T.brand,
+        <button onClick={() => nav('addvet')} className="btn-press" style={{
+          border:'none', background:T.brandSoft, color:T.brand,
           borderRadius:99, padding:'6px 14px', fontSize:13, fontWeight:700,
           fontFamily:FONT_BODY, cursor:'pointer' }}>+ Agendar</button>
       </div>
 
       <div style={{ flex:1, overflowY:'auto', padding:'16px 20px 80px' }}>
-        {/* Hero card */}
-        <div style={{ borderRadius:24, padding:20, marginBottom:20,
-          background:`linear-gradient(135deg, ${T.brand} 0%, #9B86FD 100%)`,
-          boxShadow:`0 8px 24px rgba(124,107,252,0.35)` }}>
-          <div style={{ fontSize:12, fontWeight:600, color:'rgba(255,255,255,0.75)', marginBottom:4 }}>
-            Próxima consulta
-          </div>
-          <div style={{ fontSize:20, fontWeight:800, color:'#fff', marginBottom:2 }}>Dr. Renata Souza</div>
-          <div style={{ fontSize:13, color:'rgba(255,255,255,0.75)', marginBottom:12 }}>
-            Clínica Veterinária VetCenter
-          </div>
-          <div style={{ height:1, background:'rgba(255,255,255,0.18)', marginBottom:12 }} />
-          <div style={{ display:'flex', gap:20, marginBottom:16 }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-              <span style={{ fontSize:16 }}>📅</span>
-              <span style={{ fontSize:14, fontWeight:600, color:'#fff' }}>14 junho 2025</span>
+        {/* Hero — most recent / next */}
+        {next && (
+          <div style={{ borderRadius:24, padding:20, marginBottom:20,
+            background:`linear-gradient(135deg, ${T.brand} 0%, #9B86FD 100%)`,
+            boxShadow:`0 8px 24px rgba(124,107,252,0.35)` }}>
+            <div style={{ fontSize:12, fontWeight:600, color:'rgba(255,255,255,0.75)', marginBottom:4 }}>
+              Consulta agendada
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-              <span style={{ fontSize:16 }}>🕐</span>
-              <span style={{ fontSize:14, fontWeight:600, color:'#fff' }}>14:30</span>
+            <div style={{ fontSize:20, fontWeight:800, color:'#fff', marginBottom:2 }}>
+              {next.vet || 'Veterinário'}
             </div>
+            {next.clinic && (
+              <div style={{ fontSize:13, color:'rgba(255,255,255,0.75)', marginBottom:12 }}>
+                {next.clinic}
+              </div>
+            )}
+            <div style={{ height:1, background:'rgba(255,255,255,0.18)', marginBottom:12 }} />
+            <div style={{ display:'flex', gap:20, marginBottom:next.reason ? 12 : 0 }}>
+              {next.date && (
+                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                  <span style={{ fontSize:16 }}>📅</span>
+                  <span style={{ fontSize:14, fontWeight:600, color:'#fff' }}>{next.date}</span>
+                </div>
+              )}
+              {next.time && (
+                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                  <span style={{ fontSize:16 }}>🕐</span>
+                  <span style={{ fontSize:14, fontWeight:600, color:'#fff' }}>{next.time}</span>
+                </div>
+              )}
+            </div>
+            {next.reason && (
+              <div style={{ fontSize:13, color:'rgba(255,255,255,0.8)' }}>{next.reason}</div>
+            )}
           </div>
-          <div style={{ display:'flex', gap:10 }}>
-            {['📍 Ver no mapa','📞 Ligar'].map(a => (
-              <div key={a} style={{ flex:1, textAlign:'center', padding:'8px 0', borderRadius:10,
-                background:'rgba(255,255,255,0.18)', fontSize:12, fontWeight:700,
-                color:'#fff', cursor:'pointer' }}>{a}</div>
-            ))}
-          </div>
-        </div>
+        )}
 
         {/* Tab */}
         <div style={{ display:'flex', gap:4, marginBottom:16, padding:'3px', background:T.bgWash, borderRadius:14 }}>
@@ -89,39 +126,33 @@ export default function VetConsultations() {
 
         {tab === 'Histórico' && (
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-            {HISTORY.map((c, i) => (
-              <div key={i} style={{ background:T.surface, borderRadius:16, padding:'14px 16px',
+            {sorted.map((c) => (
+              <div key={c.id} style={{ background:T.surface, borderRadius:16, padding:'14px 16px',
                 boxShadow:'0 2px 8px rgba(20,20,30,0.05)' }}>
-                <div style={{ fontSize:11, color:T.inkSoft, marginBottom:4 }}>{c.date}</div>
+                <div style={{ fontSize:11, color:T.inkSoft, marginBottom:4 }}>
+                  {c.date || '—'}{c.time ? ` · ${c.time}` : ''}
+                </div>
                 <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
                   <div style={{ padding:'3px 10px', background:T.brandSoft, borderRadius:99,
-                    fontSize:11, fontWeight:700, color:T.brand }}>{c.vet}</div>
-                  <div style={{ fontSize:13, fontWeight:700, color:'#16A34A', marginLeft:'auto' }}>{c.cost}</div>
+                    fontSize:11, fontWeight:700, color:T.brand }}>{c.vet || 'Veterinário'}</div>
                 </div>
-                <div style={{ fontSize:13, fontWeight:600, color:T.ink, marginBottom:8 }}>{c.diag}</div>
-                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
-                  {c.chips.map(ch => (
-                    <div key={ch} style={{ padding:'4px 10px', background:T.bgWash,
-                      borderRadius:6, fontSize:11, fontWeight:500, color:T.inkSoft }}>
-                      📎 {ch}
-                    </div>
-                  ))}
-                </div>
+                {c.reason && (
+                  <div style={{ fontSize:13, fontWeight:600, color:T.ink }}>{c.reason}</div>
+                )}
+                {c.clinic && (
+                  <div style={{ fontSize:12, color:T.inkSoft, marginTop:4 }}>{c.clinic}</div>
+                )}
               </div>
             ))}
           </div>
         )}
 
         {tab === 'Favoritos' && (
-          <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
-            {['Dr. Renata','Dr. Carlos'].map(v => (
-              <div key={v} style={{ background:T.surface, borderRadius:16, padding:16,
-                boxShadow:'0 2px 8px rgba(20,20,30,0.05)', minWidth:140 }}>
-                <div style={{ fontSize:28, marginBottom:6 }}>🩺</div>
-                <div style={{ fontSize:13, fontWeight:700, color:T.ink }}>{v}</div>
-                <div style={{ fontSize:11, color:T.inkSoft }}>Consulta geral</div>
-              </div>
-            ))}
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center',
+            justifyContent:'center', gap:12, padding:'32px 0', textAlign:'center' }}>
+            <div style={{ fontSize:40 }}>⭐</div>
+            <div style={{ fontSize:14, fontWeight:700, color:T.ink }}>Nenhum favorito ainda</div>
+            <div style={{ fontSize:13, color:T.inkSoft }}>Seus veterinários favoritos aparecerão aqui</div>
           </div>
         )}
       </div>

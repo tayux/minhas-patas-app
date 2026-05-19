@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
+import { usePet } from '../components/PetContext.jsx';
 import { Icon, I, IconBtn } from '../components/Shared.jsx';
+import { maskDate } from '../utils/dateUtils.js';
 
 const TYPES = [
   { e:'💊', l:'Comprimido' },
@@ -9,6 +11,8 @@ const TYPES = [
   { e:'💉', l:'Injeção' },
   { e:'🩹', l:'Tópico' },
 ];
+const TYPE_EMOJI  = ['💊','🧴','💉','🩹'];
+const TYPE_TINTS  = ['tintLavender','tintSky','tintMint','tintPeach'];
 
 const FREQ_OPTIONS = ['1× ao dia','2× ao dia','3× ao dia','4× ao dia','A cada 8h','A cada 12h','Semanal','Quando necessário'];
 const UNIT_OPTIONS = ['mg','ml','g','comprimido','gota'];
@@ -32,23 +36,45 @@ const inputStyle = (extra = {}) => ({
 
 export default function AddMedication() {
   const { back } = useNav();
-  const [step, setStep]         = useState(1);
-  const [type, setType]         = useState(0);
-  const [name, setName]         = useState('');
-  const [active, setActive]     = useState('');
-  const [dose, setDose]         = useState('');
-  const [unitIdx, setUnitIdx]   = useState(0);
-  const [freqIdx, setFreqIdx]   = useState(1);
-  const [startDate, setStart]   = useState('');
-  const [endDate, setEnd]       = useState('');
-  const [continuous, setCont]   = useState(false);
-  const [reminders, setRem]     = useState(true);
-  const [pushNotif, setPush]    = useState(true);
-  const [alarm, setAlarm]       = useState(false);
-  const [notes, setNotes]       = useState('');
+  const { addMedication } = usePet();
+  const [step, setStep]       = useState(1);
+  const [type, setType]       = useState(0);
+  const [name, setName]       = useState('');
+  const [active, setActive]   = useState('');
+  const [dose, setDose]       = useState('');
+  const [unitIdx, setUnitIdx] = useState(0);
+  const [freqIdx, setFreqIdx] = useState(1);
+  const [startDate, setStart] = useState('');
+  const [endDate, setEnd]     = useState('');
+  const [continuous, setCont] = useState(false);
+  const [reminders, setRem]   = useState(true);
+  const [pushNotif, setPush]  = useState(true);
+  const [alarm, setAlarm]     = useState(false);
+  const [notes, setNotes]     = useState('');
 
   const cycleUnit = () => setUnitIdx(i => (i + 1) % UNIT_OPTIONS.length);
   const cycleFreq = () => setFreqIdx(i => (i + 1) % FREQ_OPTIONS.length);
+
+  const handleSave = () => {
+    if (name.trim()) {
+      addMedication({
+        name: name.trim(),
+        active: active.trim(),
+        type,
+        emoji: TYPE_EMOJI[type],
+        tintKey: TYPE_TINTS[type],
+        dose: dose,
+        unit: UNIT_OPTIONS[unitIdx],
+        freq: FREQ_OPTIONS[freqIdx],
+        startDate,
+        endDate,
+        continuous,
+        notes: notes.trim(),
+        on: true,
+      });
+    }
+    back();
+  };
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
@@ -134,7 +160,8 @@ export default function AddMedication() {
                   <div key={d.l} style={{ flex:1, background:T.bgWash, borderRadius:14, padding:'10px 14px' }}>
                     <div style={{ fontSize:11, color:T.inkSoft, marginBottom:4 }}>{d.l}</div>
                     <input style={inputStyle({ fontSize:13, fontWeight:700 })}
-                      placeholder="dd/mm/aaaa" value={d.v} onChange={e => d.set(e.target.value)}
+                      placeholder="dd/mm/aaaa" value={d.v}
+                      onChange={e => d.set(maskDate(e.target.value))}
                       inputMode="numeric" />
                   </div>
                 ))}
@@ -199,7 +226,7 @@ export default function AddMedication() {
 
       <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'12px 20px 28px',
         background:`linear-gradient(to top, ${T.bg} 80%, transparent)` }}>
-        <button onClick={step===1 ? () => setStep(2) : back} className="btn-press" style={{
+        <button onClick={step===1 ? () => setStep(2) : handleSave} className="btn-press" style={{
           width:'100%', height:52, borderRadius:100, border:'none',
           background:T.brand, color:'#fff', fontSize:16, fontWeight:700,
           fontFamily:FONT_BODY, cursor:'pointer' }}>

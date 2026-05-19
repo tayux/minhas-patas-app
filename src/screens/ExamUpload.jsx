@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { Icon, I, IconBtn } from '../components/Shared.jsx';
+import { maskDate } from '../utils/dateUtils.js';
 
 const CATS = ['Hemograma','Raio-X','Ultrassom','Urina / EAS','Bioquímica','Cultura','Outros'];
 
@@ -68,8 +69,8 @@ export default function ExamUpload() {
             <div style={{ background:T.bgWash, borderRadius:14, padding:'13px 16px',
               display:'flex', alignItems:'center', gap:8 }}>
               <span>📅</span>
-              <input style={inputStyle} placeholder="dd / mm / aaaa"
-                value={date} onChange={e => setDate(e.target.value)} inputMode="numeric" />
+              <input style={inputStyle} placeholder="dd/mm/aaaa"
+                value={date} onChange={e => setDate(maskDate(e.target.value))} inputMode="numeric" />
             </div>
           </div>
 

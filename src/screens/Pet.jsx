@@ -45,7 +45,14 @@ export default function Pet() {
       </div>
       <div style={{ flex:1, overflowY:'auto', padding:'16px 24px 24px', position:'relative' }}>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', marginTop:8 }}>
-          <Mascot size={150} />
+          {activePet.photoUrl
+            ? <div style={{ width:150, height:150, borderRadius:75, overflow:'hidden',
+                border:`3px solid ${T.surface}`, boxShadow:'0 4px 20px rgba(20,20,30,0.12)' }}>
+                <img src={activePet.photoUrl} alt={activePet.name}
+                  style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              </div>
+            : <Mascot size={150} />
+          }
           <Eyebrow style={{ marginTop:12 }}>{activePet.gender} · {activePet.breed}</Eyebrow>
           <Display size={52} weight={400} style={{ marginTop:6 }}>
             <span style={{ fontStyle:'italic' }}>{activePet.name}</span>

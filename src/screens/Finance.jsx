@@ -64,7 +64,7 @@ function BarChart({ months, selectedKey, peak, onSelect }) {
 
 export default function Finance() {
   const { back, nav } = useNav();
-  const { activePet } = usePet();
+  const { activePet, expenses } = usePet();
   if (!activePet) return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
       <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
@@ -90,13 +90,9 @@ export default function Finance() {
     { label:'Alimentação',  pct:19.7, color:'#D4A93A' },
     { label:'Outros',       pct: 6.3, color:'#5BA890' },
   ];
-  const expenses = [
-    { name:'Veterinário Dr. Henrique', cat:'Consulta',    emoji:'🩺', tint:T.tintRose,     date:'12 mai', val:280.00 },
-    { name:'Prednisolona 10mg',        cat:'Medicamento', emoji:'💊', tint:T.tintLavender, date:'12 mai', val: 68.40 },
-    { name:'Ração Premier sênior',     cat:'Alimentação', emoji:'🥣', tint:T.tintCream,    date:'09 mai', val:145.90 },
-    { name:'Protetor hepático',        cat:'Medicamento', emoji:'🧴', tint:T.tintSky,      date:'07 mai', val: 92.50 },
-    { name:'Banho & tosa',             cat:'Outros',      emoji:'🛁', tint:T.tintMint,     date:'04 mai', val: 80.00 },
-  ];
+  const recentExpenses = [...expenses].sort((a,b) =>
+    new Date(b.createdAt) - new Date(a.createdAt)
+  ).slice(0, 10);
   const r = 46, circ = 2*Math.PI*r;
   let acc = 0;
   const fmt = v => v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
@@ -206,24 +202,37 @@ export default function Finance() {
           </div>
         </Card>
         <div style={{ marginTop:26 }}>
-          <SectionPill icon="📋" label="Gastos recentes" count={5} tint={T.tintCream} ink={T.tintCreamInk} />
+          <SectionPill icon="📋" label="Gastos recentes" count={recentExpenses.length}
+            tint={T.tintCream} ink={T.tintCreamInk} />
         </div>
-        <Card pad={0} radius={22} style={{ marginTop:12, overflow:'hidden' }}>
-          {expenses.map((e,i) => (
-            <div key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 14px',
-              borderBottom: i<expenses.length-1 ? `1px solid ${T.hairline}` : 'none' }}>
-              <EmojiCircle emoji={e.emoji} size={36} tint={e.tint} />
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontWeight:700, fontSize:14, color:T.ink, whiteSpace:'nowrap',
-                  overflow:'hidden', textOverflow:'ellipsis' }}>{e.name}</div>
-                <div style={{ fontSize:11, color:T.inkSoft, marginTop:1 }}>{e.cat} · {e.date}</div>
-              </div>
-              <div style={{ fontFamily:FONT_DISPLAY, fontSize:17, fontWeight:500, color:T.ink }}>
-                {e.val.toFixed(2).replace('.',',')}
-              </div>
+        {recentExpenses.length === 0 ? (
+          <div style={{ textAlign:'center', padding:'32px 20px' }}>
+            <div style={{ fontSize:36 }}>🪙</div>
+            <div style={{ fontWeight:700, fontSize:15, color:T.ink, marginTop:8 }}>
+              Nenhum gasto registrado
             </div>
-          ))}
-        </Card>
+            <div style={{ fontSize:13, color:T.inkSoft, marginTop:4 }}>
+              Toque em "Adicionar gasto" para começar a controlar as finanças do seu pet.
+            </div>
+          </div>
+        ) : (
+          <Card pad={0} radius={22} style={{ marginTop:12, overflow:'hidden' }}>
+            {recentExpenses.map((e, i) => (
+              <div key={e.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 14px',
+                borderBottom: i<recentExpenses.length-1 ? `1px solid ${T.hairline}` : 'none' }}>
+                <EmojiCircle emoji={e.emoji || '📋'} size={36} tint={T.tintCream} />
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontWeight:700, fontSize:14, color:T.ink, whiteSpace:'nowrap',
+                    overflow:'hidden', textOverflow:'ellipsis' }}>{e.desc || e.cat}</div>
+                  <div style={{ fontSize:11, color:T.inkSoft, marginTop:1 }}>{e.cat} · {e.date}</div>
+                </div>
+                <div style={{ fontFamily:FONT_DISPLAY, fontSize:17, fontWeight:500, color:T.ink }}>
+                  R$ {e.amount}
+                </div>
+              </div>
+            ))}
+          </Card>
+        )}
         <div style={{ display:'flex', gap:10, marginTop:18 }}>
           <button onClick={() => nav('reports')} style={{ flex:1, height:52, borderRadius:99, background:T.surface, color:T.ink,
             border:'none', fontFamily:FONT_BODY, fontSize:14, fontWeight:600, cursor:'pointer',
