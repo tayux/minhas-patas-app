@@ -1,6 +1,7 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
-export const PETS = [
+// Dados locais usados como fallback enquanto a API carrega
+const PETS_FALLBACK = [
   {
     id: 'leia',
     name: 'Leia',
@@ -69,14 +70,123 @@ export const PETS = [
   },
 ];
 
-export const PetCtx = createContext({ activePet: PETS[0], setActivePetId: () => {} });
+// Converte o pet do banco para o formato esperado pelos componentes
+function dbPetToUi(p) {
+  return {
+    id: p.id,
+    name: p.name,
+    hue: p.hue ?? 270,
+    photo: !!p.photo_url,
+    age: p.birth_year ? `${new Date().getFullYear() - p.birth_year} anos` : '—',
+    weight: p.weight_kg ? `${p.weight_kg} kg` : '—',
+    breed: p.breed || 'SRD',
+    gender: `${p.sex === 'male' ? 'macho' : 'fêmea'} · ${p.neutered ? 'castrado(a)' : 'não castrado(a)'}`,
+    tiles: [
+      { label:'Saúde',        emoji:'🩺', sub:'ver registros'  },
+      { label:'Medicamentos', emoji:'💊', sub:'ver lista'      },
+      { label:'Finanças',     emoji:'🪙', sub:'ver gastos'     },
+      { label:'Documentos',   emoji:'📁', sub:'ver arquivos'   },
+    ],
+    upcoming: [],
+    medsCount: 0,
+    nextDose: '—',
+    _fromDb: true,
+  };
+}
+
+// Garante que o usuário local existe no banco; cria se necessário
+async function ensureUser() {
+  let userId = localStorage.getItem('mp_user_id');
+  if (userId) return userId;
+
+  const res = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'Taynara', avatar_hue: 28 }),
+  });
+  if (!res.ok) throw new Error('Falha ao criar usuário');
+  const user = await res.json();
+  localStorage.setItem('mp_user_id', user.id);
+  return user.id;
+}
+
+export const PETS = PETS_FALLBACK;
+
+export const PetCtx = createContext({
+  activePet: PETS_FALLBACK[0],
+  setActivePetId: () => {},
+  PETS: PETS_FALLBACK,
+  userId: null,
+  loading: false,
+  addPet: async () => {},
+  updatePet: async () => {},
+});
+
 export const usePet = () => useContext(PetCtx);
 
 export function PetProvider({ children }) {
-  const [activePetId, setActivePetId] = useState('leia');
-  const activePet = PETS.find(p => p.id === activePetId) || PETS[0];
+  const [pets, setPets]             = useState(PETS_FALLBACK);
+  const [activePetId, setActivePetId] = useState(PETS_FALLBACK[0].id);
+  const [userId, setUserId]         = useState(null);
+  const [loading, setLoading]       = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const uid = await ensureUser();
+        if (cancelled) return;
+        setUserId(uid);
+
+        const res = await fetch(`/api/pets?userId=${uid}`);
+        if (!res.ok) throw new Error('Falha ao buscar pets');
+        const dbPets = await res.json();
+        if (cancelled) return;
+
+        if (dbPets.length > 0) {
+          const uiPets = dbPets.map(dbPetToUi);
+          setPets(uiPets);
+          setActivePetId(uiPets[0].id);
+        }
+      } catch (err) {
+        console.warn('API indisponível, usando dados locais:', err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const addPet = async (petData) => {
+    const res = await fetch('/api/pets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, ...petData }),
+    });
+    if (!res.ok) throw new Error('Falha ao criar pet');
+    const newPet = await res.json();
+    const uiPet = dbPetToUi(newPet);
+    setPets(prev => [...prev, uiPet]);
+    return uiPet;
+  };
+
+  const updatePet = async (id, petData) => {
+    const res = await fetch(`/api/pets/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(petData),
+    });
+    if (!res.ok) throw new Error('Falha ao atualizar pet');
+    const updated = await res.json();
+    const uiPet = dbPetToUi(updated);
+    setPets(prev => prev.map(p => p.id === id ? uiPet : p));
+    return uiPet;
+  };
+
+  const activePet = pets.find(p => p.id === activePetId) || pets[0];
+
   return (
-    <PetCtx.Provider value={{ activePet, setActivePetId, PETS }}>
+    <PetCtx.Provider value={{ activePet, setActivePetId, PETS: pets, userId, loading, addPet, updatePet }}>
       {children}
     </PetCtx.Provider>
   );

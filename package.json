@@ -5,14 +5,30 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "@react-oauth/google": "^0.13.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^5.2.1",
+    "@storybook/addon-a11y": "^10.4.0",
+    "@storybook/addon-docs": "^10.4.0",
+    "@storybook/addon-mcp": "^0.6.0",
+    "@storybook/addon-vitest": "^10.4.0",
+    "@storybook/react-vite": "^10.4.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.3.5"
+    "@vitest/browser-playwright": "^4.1.6",
+    "@vitest/coverage-v8": "^4.1.6",
+    "playwright": "^1.60.0",
+    "prop-types": "^15.8.1",
+    "storybook": "^10.4.0",
+    "vite": "^6.3.5",
+    "vitest": "^4.1.6"
   }
 }

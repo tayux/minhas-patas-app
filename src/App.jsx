@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { NavCtx } from './components/NavContext.jsx';
 import { PetProvider } from './components/PetContext.jsx';
+import { useAuth } from './components/AuthContext.jsx';
 import { PhoneShell } from './components/Shared.jsx';
 import { T } from './theme.js';
 
@@ -55,7 +56,8 @@ const SCREENS = {
 };
 
 export default function App() {
-  const [screen, setScreen]       = useState('onboarding');
+  const { user } = useAuth();
+  const [screen, setScreen]       = useState(() => user ? 'home' : 'onboarding');
   const [history, setHistory]     = useState([]);
   const [direction, setDirection] = useState('forward');
   const [screenKey, setScreenKey] = useState(0);
