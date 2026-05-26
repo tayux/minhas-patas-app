@@ -1,33 +1,81 @@
 import { useState } from 'react';
+import {
+  PawPrint, Bell, Plus, MoreHorizontal,
+  ChevronRight, ChevronLeft, ChevronDown,
+  Check, Search, Calendar, ScanLine, Mail,
+  Pencil, ArrowRight, Download, Menu, User, Wallet,
+  Trash2, X, Stethoscope, Pill, Coins, FolderOpen,
+  Clock, AlertTriangle, Building2, Microscope,
+  Paperclip, FileText, Syringe, Scissors, Heart,
+  Activity, DollarSign, Notebook, ClipboardList,
+  CheckCircle2, RotateCcw, Sparkles,
+} from 'lucide-react';
 import { T, FONT_DISPLAY, FONT_BODY } from '../theme.js';
 import { useNav } from './NavContext.jsx';
+import { usePet } from './PetContext.jsx';
 
-export const Icon = ({ d, size = 22, color = 'currentColor', stroke = 1.6, fill = 'none', style }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color}
-    strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" style={style}>
-    {typeof d === 'string' ? <path d={d} /> : d}
-  </svg>
-);
-
+// ── Icon registry ─────────────────────────────────────────────────────────────
+// All values are Lucide React components — pass directly to <Icon d={I.xxx} />
 export const I = {
-  paw:  <><circle cx="6" cy="11" r="2"/><circle cx="10" cy="6" r="2"/><circle cx="14" cy="6" r="2"/><circle cx="18" cy="11" r="2"/><path d="M8 17c0-2.5 1.8-4 4-4s4 1.5 4 4-1.8 4-4 4-4-1.5-4-4z"/></>,
-  bell: <><path d="M6 9a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8z"/><path d="M10 21a2 2 0 0 0 4 0"/></>,
-  plus: <path d="M12 5v14M5 12h14"/>,
-  more: <><circle cx="6" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="18" cy="12" r="1.5" fill="currentColor"/></>,
-  chevR: <path d="M9 6l6 6-6 6"/>,
-  chevL: <path d="M15 6l-6 6 6 6"/>,
-  chevD: <path d="M6 9l6 6 6-6"/>,
-  check: <path d="M5 12l5 5L20 7"/>,
-  search: <><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></>,
-  cal:  <><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></>,
-  scan: <path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/>,
-  mail: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></>,
-  edit: <><path d="M4 20h4l11-11-4-4L4 16v4z"/><path d="M14 6l4 4"/></>,
-  arrow: <><path d="M5 12h14M13 6l6 6-6 6"/></>,
-  download: <><path d="M12 3v14M6 13l6 6 6-6M5 21h14"/></>,
-  burger: <path d="M5 8h14M5 16h8"/>,
-  person: <><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,
-  wallet: <><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></>,
+  // Navigation & actions
+  paw:      PawPrint,
+  bell:     Bell,
+  plus:     Plus,
+  more:     MoreHorizontal,
+  chevR:    ChevronRight,
+  chevL:    ChevronLeft,
+  chevD:    ChevronDown,
+  check:    Check,
+  search:   Search,
+  cal:      Calendar,
+  scan:     ScanLine,
+  mail:     Mail,
+  edit:     Pencil,
+  arrow:    ArrowRight,
+  download: Download,
+  burger:   Menu,
+  person:   User,
+  wallet:   Wallet,
+  trash:    Trash2,
+  close:    X,
+  heart:    Heart,
+  activity: Activity,
+  rotate:   RotateCcw,
+  sparkles: Sparkles,
+  // Semantic / screen-specific
+  health:   Stethoscope,
+  meds:     Pill,
+  finance:  Coins,
+  docs:     FolderOpen,
+  clock:    Clock,
+  alert:    AlertTriangle,
+  hospital: Building2,
+  exam:     Microscope,
+  clip:     Paperclip,
+  file:     FileText,
+  vaccine:  Syringe,
+  scissors: Scissors,
+  notebook: Notebook,
+  checkOk:  CheckCircle2,
+  list:     ClipboardList,
+  dollar:   DollarSign,
+};
+
+// ── Icon renderer ─────────────────────────────────────────────────────────────
+// Accepts a Lucide component (function OR forwardRef object) or legacy SVG path string
+export const Icon = ({ d: D, size = 22, color = 'currentColor', stroke = 1.6, fill = 'none', style }) => {
+  // Lucide icons can be forwardRef objects (typeof === 'object') or plain functions
+  if (D && typeof D !== 'string') {
+    return <D size={size} color={color} strokeWidth={stroke} style={style} />;
+  }
+  if (!D) return null;
+  // Legacy: raw SVG path string
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" style={style}>
+      <path d={D} />
+    </svg>
+  );
 };
 
 export const GoogleG = ({ size = 18 }) => (
@@ -39,21 +87,40 @@ export const GoogleG = ({ size = 18 }) => (
   </svg>
 );
 
-export const SectionPill = ({ icon, label, count, tint = T.tintLavender, ink = T.tintLavenderInk, style }) => (
-  <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'8px 14px 8px 12px',
-    borderRadius:999, background:tint, color:ink, fontFamily:FONT_BODY, fontSize:11,
-    fontWeight:700, letterSpacing:1.2, textTransform:'uppercase', whiteSpace:'nowrap', ...style }}>
-    {icon && <span style={{ fontSize:14, lineHeight:1 }}>{icon}</span>}
-    <span>{label}{count != null && ` (${count})`}</span>
-    <Icon d={I.chevD} size={14} color={ink} stroke={2} />
-  </div>
-);
+// ── IconCircle ────────────────────────────────────────────────────────────────
+// Replaces EmojiCircle for Lucide icons
+export const IconCircle = ({ icon: LucideIcon, size = 44, tint = T.tintLavender, color, style }) => {
+  if (!LucideIcon) return null;
+  return (
+    <div style={{ width:size, height:size, borderRadius:'50%', background:tint,
+      display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, ...style }}>
+      <LucideIcon size={Math.round(size * 0.48)} color={color || 'currentColor'} strokeWidth={1.8} />
+    </div>
+  );
+};
 
+// Keep EmojiCircle for cases where emoji content strings are still used
 export const EmojiCircle = ({ emoji, size = 44, tint = T.tintLavender, style }) => (
   <div style={{ width:size, height:size, borderRadius:'50%', background:tint,
     display:'flex', alignItems:'center', justifyContent:'center',
     fontSize:size * 0.46, flexShrink:0, ...style }}>{emoji}</div>
 );
+
+export const SectionPill = ({ icon, label, count, tint = T.tintLavender, ink = T.tintLavenderInk, style }) => {
+  const IconEl = typeof icon === 'function' ? icon : null;
+  return (
+    <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'8px 14px 8px 12px',
+      borderRadius:999, background:tint, color:ink, fontFamily:FONT_BODY, fontSize:11,
+      fontWeight:700, letterSpacing:1.2, textTransform:'uppercase', whiteSpace:'nowrap', ...style }}>
+      {IconEl
+        ? <IconEl size={14} strokeWidth={2.2} color={ink} />
+        : icon && <span style={{ fontSize:14, lineHeight:1 }}>{icon}</span>
+      }
+      <span>{label}{count != null && ` (${count})`}</span>
+      <ChevronDown size={14} color={ink} strokeWidth={2} />
+    </div>
+  );
+};
 
 export const CheckBubble = ({ done = false, size = 28, color = T.brand, onClick }) => {
   const [scale, setScale] = useState(1);
@@ -74,7 +141,7 @@ export const CheckBubble = ({ done = false, size = 28, color = T.brand, onClick 
         transform:`scale(${scale})`,
         transition:'transform 0.18s cubic-bezier(0.34,1.56,0.64,1), background 0.15s, border-color 0.15s',
         WebkitTapHighlightColor:'transparent' }}>
-      {done && <Icon d={I.check} size={size * 0.55} color="#fff" stroke={3} />}
+      {done && <Check size={size * 0.55} color="#fff" strokeWidth={3} />}
     </div>
   );
 };
@@ -127,12 +194,14 @@ export const Mascot = ({ size = 200 }) => (
     userSelect:'none', pointerEvents:'none', display:'block', flexShrink:0 }} />
 );
 
-export const MascotAvatar = ({ size = 40, hue = 270, photo = false }) => {
-  if (photo) return (
+export const MascotAvatar = ({ size = 40, hue = 270, photo = false, photoUrl = null }) => {
+  const src = photoUrl || (photo ? '/leia-nova.png' : null);
+  if (src) return (
     <div style={{ width:size, height:size, borderRadius:'50%', overflow:'hidden',
       flexShrink:0, background:T.brandSoft, boxShadow:'0 1px 2px rgba(20,20,30,0.10)' }}>
-      <img src="/leia-nova.png" alt="" draggable={false} style={{
-        width:'100%', height:'100%', objectFit:'contain', objectPosition:'50% 20%',
+      <img src={src} alt="" draggable={false} style={{
+        width:'100%', height:'100%', objectFit: photoUrl ? 'cover' : 'contain',
+        objectPosition:'50% 20%',
         display:'block', userSelect:'none', pointerEvents:'none' }} />
     </div>
   );
@@ -214,6 +283,7 @@ export const BottomNav = ({ active = 'home' }) => {
         boxShadow:'0 1px 2px rgba(20,20,30,0.04), 0 8px 22px -8px rgba(20,20,30,0.10)' }}>
         {items.map(it => {
           const isActive = active === it.id;
+          const NavIcon = it.icon;
           return (
             <div key={it.id} onClick={() => nav(it.id)}
               className="nav-item"
@@ -221,8 +291,8 @@ export const BottomNav = ({ active = 'home' }) => {
                 background: isActive ? T.brandSoft : 'transparent',
                 display:'flex', flexDirection:'column', alignItems:'center', gap:3,
                 cursor:'pointer', WebkitTapHighlightColor:'transparent' }}>
-              <Icon d={it.icon} size={20} color={isActive ? T.brand : T.inkSoft}
-                stroke={isActive ? 2.2 : 1.8} />
+              <NavIcon size={20} color={isActive ? T.brand : T.inkSoft}
+                strokeWidth={isActive ? 2.2 : 1.8} />
               <span style={{ fontSize:10.5, fontWeight:700,
                 color: isActive ? T.brand : T.inkSoft }}>{it.label}</span>
             </div>
@@ -244,6 +314,59 @@ export const Eyebrow = ({ children, color = T.inkMute, style }) => (
   <div style={{ fontFamily:FONT_BODY, fontSize:11, fontWeight:700, letterSpacing:1.4,
     textTransform:'uppercase', color, ...style }}>{children}</div>
 );
+
+export const PetHeader = () => {
+  const { activePet, PETS, setActivePetId } = usePet();
+  const [open, setOpen] = useState(false);
+  if (!activePet) return null;
+  return (
+    <>
+      <div onClick={() => PETS.length > 1 && setOpen(true)}
+        style={{ display:'flex', alignItems:'center', gap:8,
+          background:T.surface, borderRadius:99, padding:'6px 12px 6px 6px',
+          boxShadow:'0 1px 4px rgba(20,20,30,0.07)', cursor: PETS.length > 1 ? 'pointer' : 'default',
+          WebkitTapHighlightColor:'transparent', alignSelf:'flex-start' }}>
+        <MascotAvatar size={28} hue={activePet.hue} photo={activePet.photo} photoUrl={activePet.photoUrl} />
+        <span style={{ fontSize:13, fontWeight:700, color:T.ink, maxWidth:120,
+          overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{activePet.name}</span>
+        {PETS.length > 1 && <ChevronDown size={14} color={T.inkSoft} strokeWidth={2} />}
+      </div>
+
+      {open && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)',
+          display:'flex', alignItems:'flex-end', zIndex:300 }}
+          onClick={() => setOpen(false)}>
+          <div style={{ width:'100%', background:T.bg, borderRadius:'24px 24px 0 0',
+            padding:'20px 20px 40px' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize:15, fontWeight:800, color:T.ink, marginBottom:16 }}>
+              Trocar pet
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              {PETS.map(p => (
+                <div key={p.id} onClick={() => { setActivePetId(p.id); setOpen(false); }}
+                  style={{ display:'flex', alignItems:'center', gap:12,
+                    background: p.id === activePet.id ? T.brandSoft : T.surface,
+                    borderRadius:16, padding:'12px 14px', cursor:'pointer',
+                    border: `1.5px solid ${p.id === activePet.id ? T.brand : 'transparent'}` }}>
+                  <MascotAvatar size={40} hue={p.hue} photo={p.photo} photoUrl={p.photoUrl} />
+                  <div>
+                    <div style={{ fontSize:15, fontWeight:700, color:T.ink }}>{p.name}</div>
+                    <div style={{ fontSize:12, color:T.inkSoft }}>{p.breed}</div>
+                  </div>
+                  {p.id === activePet.id && (
+                    <div style={{ marginLeft:'auto', padding:'3px 10px', borderRadius:99,
+                      background:T.brand, color:'#fff', fontSize:11, fontWeight:700 }}>ativo</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 export const Stripe = ({ w = '100%', h = 100, radius = 14, label }) => (
   <div style={{ width:w, height:h, borderRadius:radius,
