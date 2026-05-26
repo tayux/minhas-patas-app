@@ -40,6 +40,7 @@ export default function PetOnboarding() {
   const [breed, setBreed]       = useState('');
   const [birthDate, setBirth]   = useState('');
   const [sex, setSex]           = useState('Fêmea');
+  const [neutered, setNeutered] = useState('Não');
   const [weight, setWeight]     = useState('');
   const [photoPreview, setPhoto] = useState(null);
   const [saving, setSaving]     = useState(false);
@@ -63,6 +64,7 @@ export default function PetOnboarding() {
         name: name.trim(),
         species: species === 'Cachorro' ? 'dog' : 'cat',
         sex: sex === 'Fêmea' ? 'female' : 'male',
+        neutered: neutered === 'Sim',
         breed: breed.trim() || null,
         weight_kg: weight ? parseFloat(weight.replace(',', '.')) : null,
         birth_year: birthYear || null,
@@ -71,7 +73,9 @@ export default function PetOnboarding() {
       setActivePetId(newPet.id);
       nav('home');
     } catch (e) {
-      setError('Erro ao salvar. Tente novamente.');
+      setError(e?.message?.startsWith('Falha') || e?.message?.startsWith('Usuário')
+        ? e.message
+        : 'Erro ao salvar. Tente novamente.');
     } finally {
       setSaving(false);
     }
@@ -175,6 +179,11 @@ export default function PetOnboarding() {
               value={sex === 'Fêmea' ? '♀  Fêmea' : '♂  Macho'}
               onChange={v => setSex(v.includes('Fêmea') ? 'Fêmea' : 'Macho')}
             />
+          </div>
+
+          <div style={{ marginBottom:18 }}>
+            <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:6 }}>Castrado(a)?</div>
+            <Seg options={['Sim','Não']} value={neutered} onChange={setNeutered} />
           </div>
 
           <div style={{ marginBottom:4 }}>
