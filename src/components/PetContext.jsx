@@ -192,6 +192,52 @@ function financeFromDb(row) {
   };
 }
 
+function walkToDb(walk) {
+  return {
+    date: ddmmToIso(walk.date) || new Date().toISOString().slice(0, 10),
+    duration_min: walk.duration || 0,
+    distance_km: walk.distance ?? null,
+    mood: walk.mood ?? 0,
+    notes: walk.notes || null,
+  };
+}
+
+function walkFromDb(row) {
+  return {
+    id: row.id,
+    date: isoToDdmm(row.date) || row.date,
+    duration: row.duration_min || 0,
+    distance: row.distance_km ? parseFloat(row.distance_km) : null,
+    mood: row.mood ?? 0,
+    notes: row.notes || null,
+    createdAt: row.created_at,
+    _fromDb: true,
+  };
+}
+
+function diaryToDb(entry) {
+  return {
+    date: ddmmToIso(entry.date) || new Date().toISOString().slice(0, 10),
+    mood: entry.mood ?? 3,
+    appetite: entry.appetite ?? 1,
+    behaviors: entry.behaviors || [],
+    note: entry.note || null,
+  };
+}
+
+function diaryFromDb(row) {
+  return {
+    id: row.id,
+    date: isoToDdmm(row.date) || row.date,
+    mood: row.mood ?? 3,
+    appetite: row.appetite ?? 1,
+    behaviors: Array.isArray(row.behaviors) ? row.behaviors : [],
+    note: row.note || null,
+    createdAt: row.created_at,
+    _fromDb: true,
+  };
+}
+
 function dbPetToUi(p) {
   // Prefer photo from DB; fall back to localStorage (older devices before sync)
   const photoUrl = p.photo_url || localStorage.getItem(`pet_photo_${p.id}`) || null;
@@ -446,40 +492,42 @@ export function PetProvider({ children }) {
     let cancelled = false;
     (async () => {
       try {
-        const [medsRes, healthRes, vacRes, finRes] = await Promise.all([
+        const [medsRes, healthRes, vacRes, finRes, walksRes, diaryRes] = await Promise.all([
           fetch(`/api/pets/${pid}/medications`),
           fetch(`/api/pets/${pid}/health`),
           fetch(`/api/pets/${pid}/vaccines`),
           fetch(`/api/pets/${pid}/finances`),
+          fetch(`/api/pets/${pid}/walks`),
+          fetch(`/api/pets/${pid}/diary`),
         ]);
         if (cancelled) return;
 
-        const [medsRows, healthRows, vacRows, finRows] = await Promise.all([
-          medsRes.ok  ? medsRes.json()   : [],
-          healthRes.ok ? healthRes.json() : [],
-          vacRes.ok   ? vacRes.json()    : [],
-          finRes.ok   ? finRes.json()    : [],
+        const [medsRows, healthRows, vacRows, finRows, walksRows, diaryRows] = await Promise.all([
+          medsRes.ok   ? medsRes.json()   : null,
+          healthRes.ok ? healthRes.json() : null,
+          vacRes.ok    ? vacRes.json()    : null,
+          finRes.ok    ? finRes.json()    : null,
+          walksRes.ok  ? walksRes.json()  : null,
+          diaryRes.ok  ? diaryRes.json()  : null,
         ]);
         if (cancelled) return;
-
-        const meds        = medsRows.map(medFromDb);
-        const vaccines    = vacRows.map(vaccineFromDb);
-        const finances    = finRows.map(financeFromDb);
-        const healthRecs  = healthRows.filter(r => !['consulta','higiene','documento'].includes(r.type)).map(healthFromDb);
-        const consults    = healthRows.filter(r => r.type === 'consulta').map(healthFromDb);
-        const hygienes    = healthRows.filter(r => r.type === 'higiene').map(healthFromDb);
-        const docs        = healthRows.filter(r => r.type === 'documento').map(healthFromDb);
 
         savePetData(prev => {
           const cur = prev[pid] || {};
+          // Only overwrite when the API responded (null = request failed, keep cache).
+          // This correctly handles empty arrays: if DB returns [], that IS the truth.
           const patch = {};
-          if (meds.length     > 0) patch.medications   = meds;
-          if (vaccines.length > 0) patch.vaccines       = vaccines;
-          if (finances.length > 0) patch.expenses       = finances;
-          if (healthRecs.length > 0) patch.healthRecords = healthRecs;
-          if (consults.length > 0)   patch.consultations = consults;
-          if (hygienes.length > 0)   patch.hygieneRecords = hygienes;
-          if (docs.length     > 0)   patch.documents     = docs;
+          if (medsRows   !== null) patch.medications   = medsRows.map(medFromDb);
+          if (vacRows    !== null) patch.vaccines       = vacRows.map(vaccineFromDb);
+          if (finRows    !== null) patch.expenses       = finRows.map(financeFromDb);
+          if (walksRows  !== null) patch.walks          = walksRows.map(walkFromDb);
+          if (diaryRows  !== null) patch.diaryEntries   = diaryRows.map(diaryFromDb);
+          if (healthRows !== null) {
+            patch.healthRecords  = healthRows.filter(r => !['consulta','higiene','documento'].includes(r.type)).map(healthFromDb);
+            patch.consultations  = healthRows.filter(r => r.type === 'consulta').map(healthFromDb);
+            patch.hygieneRecords = healthRows.filter(r => r.type === 'higiene').map(healthFromDb);
+            patch.documents      = healthRows.filter(r => r.type === 'documento').map(healthFromDb);
+          }
           return { ...prev, [pid]: { ...cur, ...patch } };
         });
       } catch (e) {
@@ -488,6 +536,27 @@ export function PetProvider({ children }) {
     })();
     return () => { cancelled = true; };
   }, [pid]);
+
+  // Pre-load expenses for all pets so Finance "Todos" works correctly
+  // even before the user switches to each pet individually.
+  useEffect(() => {
+    if (pets.length === 0) return;
+    const otherPets = pets.filter(p => p.id !== pid && !petData[p.id]?.expenses);
+    if (otherPets.length === 0) return;
+    otherPets.forEach(p => {
+      fetch(`/api/pets/${p.id}/finances`)
+        .then(r => r.ok ? r.json() : null)
+        .then(rows => {
+          if (!rows) return;
+          savePetData(prev => ({
+            ...prev,
+            [p.id]: { ...prev[p.id], expenses: rows.map(financeFromDb) },
+          }));
+        })
+        .catch(() => {});
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pets.length, pid]);
 
   // Per-pet data helpers
   const getList = (key) => (pid ? (petData[pid]?.[key] || []) : []);
@@ -782,18 +851,69 @@ export function PetProvider({ children }) {
     removeFromList('documents', id);
     if (pid) fetch(`/api/pets/${pid}/health?recordId=${id}`, { method: 'DELETE' }).catch(() => {});
   };
-  const diaryEntries     = getList('diaryEntries');
-  const addDiaryEntry    = (entry) => addToList('diaryEntries', entry);
-  const updateDiaryEntry = (id, patch) => updateItem('diaryEntries', id, patch);
+  const diaryEntries  = getList('diaryEntries');
+  const addDiaryEntry = (entry) => {
+    const saved = addToList('diaryEntries', entry);
+    if (saved && pid) {
+      fetch(`/api/pets/${pid}/diary`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(diaryToDb(entry)),
+      }).then(r => r.ok ? r.json() : null).then(row => {
+        if (row?.id) updateItem('diaryEntries', saved.id, { id: row.id, _fromDb: true });
+      }).catch(() => {});
+    }
+    return saved;
+  };
+  const updateDiaryEntry = (id, patch) => {
+    updateItem('diaryEntries', id, patch);
+    if (pid) {
+      fetch(`/api/pets/${pid}/diary?recordId=${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(diaryToDb(patch)),
+      }).catch(() => {});
+    }
+  };
 
-  const walks       = getList('walks');
-  const addWalk     = (walk) => addToList('walks', walk);
-  const deleteWalk  = (id)   => removeFromList('walks', id);
+  const walks = getList('walks');
+  const addWalk = (walk) => {
+    const saved = addToList('walks', walk);
+    if (saved && pid) {
+      fetch(`/api/pets/${pid}/walks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(walkToDb(walk)),
+      }).then(r => r.ok ? r.json() : null).then(row => {
+        if (row?.id) updateItem('walks', saved.id, { id: row.id, _fromDb: true });
+      }).catch(() => {});
+    }
+    return saved;
+  };
+  const deleteWalk = (id) => {
+    removeFromList('walks', id);
+    if (pid) fetch(`/api/pets/${pid}/walks?recordId=${id}`, { method: 'DELETE' }).catch(() => {});
+  };
   const walkGoal    = pid ? (petData[pid]?.walkGoal ?? 5) : 5;
   const setWalkGoal = (g)    => setForPet('walkGoal', g);
 
-  const feedbacks      = getList('feedbacks');
-  const addFeedback    = (fb) => addToList('feedbacks', fb);
+  const feedbacks   = getList('feedbacks');
+  const addFeedback = (fb) => {
+    const saved = addToList('feedbacks', fb);
+    // Also persist to DB (fire-and-forget)
+    fetch('/api/feedbacks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: userId || null,
+        rating: fb.rating,
+        category: fb.category || 'Geral',
+        comment: fb.comment || null,
+        rating_label: fb.label || null,
+      }),
+    }).catch(() => {});
+    return saved;
+  };
   const feedingConfig  = pid ? (petData[pid]?.feedingConfig || null) : null;
   const setFeedingConfig = (config) => setForPet('feedingConfig', config);
   const todayTasks     = getList('todayTasks');
