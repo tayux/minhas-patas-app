@@ -1,7 +1,7 @@
 import { T, FONT_DISPLAY, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { Icon, I, Card, EmojiCircle, IconBtn, Mascot, Eyebrow, Display, BottomNav } from '../components/Shared.jsx';
+import { Icon, I, IconCircle, Card, IconBtn, Mascot, Eyebrow, Display, BottomNav } from '../components/Shared.jsx';
 
 export default function Pet() {
   const { nav, back } = useNav();
@@ -20,15 +20,15 @@ export default function Pet() {
     </div>
   );
   const rows = [
-    { label:'Histórico de saúde',     emoji:'❤️', tint:T.tintRose,     meta:'12 registros',      to:'health' },
-    { label:'Medicamentos ativos',    emoji:'💊', tint:T.tintLavender, meta:'5 ativos', dot:true, to:'meds' },
-    { label:'Consultas',              emoji:'📅', tint:T.tintSky,      meta:'Próxima · 22 mai',  to:'vet' },
-    { label:'Vacinas',                emoji:'🛡️',tint:T.tintMint,     meta:'Em dia',             to:'vaccines' },
-    { label:'Documentos',             emoji:'📁', tint:T.tintCream,    meta:'8 arquivos',         to:'documents' },
-    { label:'Diário & comportamento', emoji:'📓', tint:T.tintPeach,    meta:'3 notas esta semana',to:'behaviordiary' },
-    { label:'Alimentação',            emoji:'🥣', tint:T.tintCream,    meta:'3 refeições/dia',    to:'feeding' },
-    { label:'Passeios & atividades',  emoji:'🐾', tint:T.tintMint,     meta:'3 de 5 esta semana', to:'walks' },
-    { label:'Higiene & beleza',       emoji:'✂️', tint:T.tintSky,      meta:'Banho · há 4 dias',  to:'hygiene' },
+    { label:'Histórico de saúde',     icon:I.health,    ink:T.tintRoseInk,      tint:T.tintRose,     meta:'12 registros',       to:'health' },
+    { label:'Medicamentos ativos',    icon:I.meds,      ink:T.tintLavenderInk,  tint:T.tintLavender, meta:'5 ativos', dot:true,  to:'meds' },
+    { label:'Consultas',              icon:I.cal,       ink:T.tintSkyInk,       tint:T.tintSky,      meta:'Próxima · 22 mai',   to:'vet' },
+    { label:'Vacinas',                icon:I.vaccine,   ink:T.tintMintInk,      tint:T.tintMint,     meta:'Em dia',             to:'vaccines' },
+    { label:'Documentos',             icon:I.docs,      ink:T.tintCreamInk,     tint:T.tintCream,    meta:'8 arquivos',         to:'documents' },
+    { label:'Diário & comportamento', icon:I.notebook,  ink:'#B45309',          tint:T.tintPeach,    meta:'3 notas esta semana',to:'behaviordiary' },
+    { label:'Alimentação',            icon:I.utensils,  ink:T.tintCreamInk,     tint:T.tintCream,    meta:'3 refeições/dia',    to:'feeding' },
+    { label:'Passeios & atividades',  icon:I.paw,       ink:T.tintMintInk,      tint:T.tintMint,     meta:'3 de 5 esta semana', to:'walks' },
+    { label:'Higiene & beleza',       icon:I.scissors,  ink:T.tintSkyInk,       tint:T.tintSky,      meta:'Banho · há 4 dias',  to:'hygiene' },
   ];
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg,
@@ -76,7 +76,7 @@ export default function Pet() {
             <div key={i} onClick={() => nav(r.to)} style={{ display:'flex', alignItems:'center',
               gap:14, padding:'14px 16px', cursor:'pointer',
               borderBottom: i < rows.length-1 ? `1px solid ${T.hairline}` : 'none' }}>
-              <EmojiCircle emoji={r.emoji} size={38} tint={r.tint} />
+              <IconCircle icon={r.icon} size={38} tint={r.tint} color={r.ink} />
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:6 }}>
                   <span style={{ fontWeight:700, fontSize:15, color:T.ink }}>{r.label}</span>

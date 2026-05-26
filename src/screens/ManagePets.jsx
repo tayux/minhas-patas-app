@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { IconBtn, I, Icon, MascotAvatar } from '../components/Shared.jsx';
+import { IconBtn, I, Icon, IconCircle, MascotAvatar } from '../components/Shared.jsx';
 
 function ConfirmDeleteModal({ pet, onConfirm, onCancel }) {
   return (
@@ -11,7 +11,9 @@ function ConfirmDeleteModal({ pet, onConfirm, onCancel }) {
       onClick={e => e.target === e.currentTarget && onCancel()}>
       <div style={{ width:'100%', background:T.bg, borderRadius:'24px 24px 0 0',
         padding:'28px 24px 40px' }}>
-        <div style={{ fontSize:36, textAlign:'center', marginBottom:12 }}>🗑️</div>
+        <div style={{ display:'flex', justifyContent:'center', marginBottom:12 }}>
+          <IconCircle icon={I.trash} size={52} tint='#FEE2E2' color='#EF4444' />
+        </div>
         <div style={{ fontSize:18, fontWeight:800, color:T.ink, textAlign:'center', marginBottom:8 }}>
           Remover {pet.name}?
         </div>
@@ -114,8 +116,8 @@ export default function ManagePets() {
                 <div onClick={e => { e.stopPropagation(); setConfirmPet(pet); }}
                   style={{ width:36, height:36, borderRadius:12, background:'#FEE2E2',
                     display:'flex', alignItems:'center', justifyContent:'center',
-                    cursor:'pointer', flexShrink:0, fontSize:16 }}>
-                  🗑️
+                    cursor:'pointer', flexShrink:0 }}>
+                  <I.trash size={17} color='#EF4444' strokeWidth={2} />
                 </div>
               </div>
             ))}
@@ -126,8 +128,10 @@ export default function ManagePets() {
       <div onClick={() => nav('petonboarding')}
         style={{ position:'absolute', bottom:24, right:20, width:56, height:56,
           borderRadius:28, background:T.ink, display:'flex', alignItems:'center',
-          justifyContent:'center', fontSize:28, color:'#fff', cursor:'pointer',
-          boxShadow:'0 8px 24px -6px rgba(20,20,30,0.4)', zIndex:10 }}>+</div>
+          justifyContent:'center', cursor:'pointer',
+          boxShadow:'0 8px 24px -6px rgba(20,20,30,0.4)', zIndex:10 }}>
+        <I.plus size={26} color='#fff' strokeWidth={2.2} />
+      </div>
 
       {confirmPet && (
         <ConfirmDeleteModal
