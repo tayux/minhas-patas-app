@@ -66,13 +66,23 @@ function printReport(petName, stats, catRows, vaccineStatus) {
 export default function ReportsExport() {
   const { back } = useNav();
   const {
-    activePet, medications, walks,
-    expenses, consultations,
+    activePet, PETS, petData, allPetsExpenses,
+    medications, walks, expenses, consultations,
     vaccines, healthRecords,
-    hygieneRecords, diaryEntries,
   } = usePet();
 
-  const [periodIdx, setPeriodIdx] = useState(0);
+  const [periodIdx, setPeriodIdx]       = useState(0);
+  const [selectedPetId, setSelectedPetId] = useState(null); // null = Todos
+
+  // Cross-pet data aggregation
+  const currentPetData  = selectedPetId ? (petData?.[selectedPetId] || {}) : null;
+  const currentMeds     = selectedPetId ? (currentPetData.medications  || []) : PETS.flatMap(p => petData?.[p.id]?.medications  || []);
+  const currentWalks    = selectedPetId ? (currentPetData.walks        || []) : PETS.flatMap(p => petData?.[p.id]?.walks        || []);
+  const currentConsults = selectedPetId ? (currentPetData.consultations|| []) : PETS.flatMap(p => petData?.[p.id]?.consultations|| []);
+  const currentHealth   = selectedPetId ? (currentPetData.healthRecords|| []) : PETS.flatMap(p => petData?.[p.id]?.healthRecords|| []);
+  const currentVaccines = selectedPetId ? (currentPetData.vaccines     || []) : PETS.flatMap(p => petData?.[p.id]?.vaccines     || []);
+  const currentExpenses = selectedPetId ? (currentPetData.expenses     || []) : (allPetsExpenses || []);
+  const currentPetName  = selectedPetId ? (PETS.find(p => p.id === selectedPetId)?.name ?? 'Pet') : 'Todos os pets';
 
   const cutoff = useMemo(() => {
     const months = PERIOD_OPTIONS[periodIdx].months;
@@ -88,19 +98,19 @@ export default function ReportsExport() {
     return d ? d >= cutoff : true;
   };
 
-  const activeMeds     = medications.filter(m => m.on !== false && m.active !== false).length;
-  const periodWalks    = walks.filter(inPeriod);
-  const periodConsults = consultations.filter(inPeriod);
-  const periodHealth   = healthRecords.filter(inPeriod);
-  const periodExp      = expenses.filter(inPeriod);
+  const activeMeds     = currentMeds.filter(m => m.on !== false && m.active !== false).length;
+  const periodWalks    = currentWalks.filter(inPeriod);
+  const periodConsults = currentConsults.filter(inPeriod);
+  const periodHealth   = currentHealth.filter(inPeriod);
+  const periodExp      = currentExpenses.filter(inPeriod);
   const totalExp       = periodExp.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
   const totalWalkMin   = periodWalks.reduce((s, w) => s + (w.duration || 0), 0);
   const totalWalkDist  = periodWalks.reduce((s, w) => s + (w.distance || 0), 0);
 
   const now = new Date();
-  const overdueVax = vaccines.filter(v => { const d = parseDdmm(v.nextDate); return d && d < now; }).length;
-  const vaccineStatus = vaccines.length === 0 ? 'Nenhuma cadastrada'
-    : overdueVax === 0 ? `${vaccines.length} em dia ✓`
+  const overdueVax = currentVaccines.filter(v => { const d = parseDdmm(v.nextDate); return d && d < now; }).length;
+  const vaccineStatus = currentVaccines.length === 0 ? 'Nenhuma cadastrada'
+    : overdueVax === 0 ? `${currentVaccines.length} em dia ✓`
     : `${overdueVax} atrasada${overdueVax > 1 ? 's' : ''}`;
 
   // Expenses by category
@@ -129,11 +139,11 @@ export default function ReportsExport() {
     .sort((a, b) => (parseDdmm(b.date)?.getTime() ?? 0) - (parseDdmm(a.date)?.getTime() ?? 0))
     .slice(0, 12);
 
-  const isEmpty = activeMeds === 0 && walks.length === 0 && expenses.length === 0 &&
-    vaccines.length === 0 && healthRecords.length === 0;
+  const isEmpty = activeMeds === 0 && currentWalks.length === 0 && currentExpenses.length === 0 &&
+    currentVaccines.length === 0 && currentHealth.length === 0;
 
   const handlePrint = () => printReport(
-    activePet?.name ?? 'Pet',
+    currentPetName,
     { activeMeds, walks: periodWalks.length, consults: periodConsults.length,
       totalExpenses: formatBRL(totalExp), healthRecs: periodHealth.length, vaccines: vaccineStatus },
     catRows,
@@ -146,7 +156,7 @@ export default function ReportsExport() {
       <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:12 }}>
         <IconBtn icon={I.chevL} onClick={back} />
         <div style={{ fontSize:20, fontWeight:800, color:T.ink, flex:1 }}>Relatórios</div>
-        {activePet && !isEmpty && (
+        {PETS.length > 0 && !isEmpty && (
           <button onClick={handlePrint} className="btn-press"
             style={{ height:36, padding:'0 16px', borderRadius:99, border:'none',
               background:T.surface, fontFamily:FONT_BODY, fontSize:13, fontWeight:700,
@@ -159,8 +169,32 @@ export default function ReportsExport() {
 
       <div style={{ flex:1, overflowY:'auto', padding:'16px 20px 80px' }}>
 
+        {/* Pet filter chips — only show when multiple pets */}
+        {PETS.length > 1 && (
+          <div style={{ display:'flex', gap:8, marginBottom:12, overflowX:'auto', paddingBottom:2 }}>
+            <div onClick={() => setSelectedPetId(null)}
+              style={{ padding:'7px 14px', borderRadius:99, flexShrink:0,
+                background: selectedPetId === null ? T.ink : T.surface,
+                color: selectedPetId === null ? '#fff' : T.ink,
+                fontSize:13, fontWeight:600, cursor:'pointer',
+                boxShadow: selectedPetId === null ? 'none' : '0 1px 2px rgba(20,20,30,0.04)' }}>
+              Todos os pets
+            </div>
+            {PETS.map(p => (
+              <div key={p.id} onClick={() => setSelectedPetId(p.id)}
+                style={{ padding:'7px 14px', borderRadius:99, flexShrink:0,
+                  background: selectedPetId === p.id ? T.brand : T.surface,
+                  color: selectedPetId === p.id ? '#fff' : T.ink,
+                  fontSize:13, fontWeight:600, cursor:'pointer',
+                  boxShadow: selectedPetId === p.id ? 'none' : '0 1px 2px rgba(20,20,30,0.04)' }}>
+                {p.name}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Period filter chips */}
-        {activePet && (
+        {(activePet || PETS.length > 0) && (
           <div style={{ display:'flex', gap:8, marginBottom:20, overflowX:'auto', paddingBottom:2 }}>
             {PERIOD_OPTIONS.map((p, i) => (
               <div key={i} onClick={() => setPeriodIdx(i)}
@@ -175,17 +209,17 @@ export default function ReportsExport() {
           </div>
         )}
 
-        {!activePet ? (
+        {PETS.length === 0 ? (
           <div style={{ textAlign:'center', padding:'64px 20px' }}>
             <div style={{ fontSize:52, marginBottom:16 }}>🐾</div>
-            <div style={{ fontSize:18, fontWeight:800, color:T.ink }}>Nenhum pet selecionado</div>
+            <div style={{ fontSize:18, fontWeight:800, color:T.ink }}>Nenhum pet cadastrado</div>
           </div>
         ) : isEmpty ? (
           <div style={{ textAlign:'center', padding:'64px 20px' }}>
             <div style={{ fontSize:52, marginBottom:16 }}>📊</div>
             <div style={{ fontSize:18, fontWeight:800, color:T.ink, marginBottom:8 }}>Sem dados ainda</div>
             <div style={{ fontSize:14, color:T.inkSoft, lineHeight:1.5, maxWidth:260, margin:'0 auto' }}>
-              Registre medicamentos, passeios, consultas e vacinas para ver o relatório de {activePet.name}.
+              Registre medicamentos, passeios, consultas e vacinas para ver o relatório de {currentPetName}.
             </div>
           </div>
         ) : (

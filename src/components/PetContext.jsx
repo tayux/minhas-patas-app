@@ -799,9 +799,16 @@ export function PetProvider({ children }) {
   const todayTasks     = getList('todayTasks');
   const setTodayTasks  = (tasks) => setForPet('todayTasks', tasks);
 
+  // All expenses across all pets (with petId + petName attached) — for Finance/Reports "Todos"
+  const allPetsExpenses = pets.flatMap(p =>
+    (petData[p.id]?.expenses || []).map(e => ({ ...e, petId: p.id, petName: p.name }))
+  );
+
   return (
     <PetCtx.Provider value={{
       activePet, setActivePetId, PETS: pets, userId, loading,
+      petData,
+      allPetsExpenses,
       addPet, updatePet, deletePet,
       medications, addMedication, updateMedication, deleteMedication,
       vaccines, addVaccine, deleteVaccine,

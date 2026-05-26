@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { IconBtn, I, PetHeader } from '../components/Shared.jsx';
+import { IconBtn, I } from '../components/Shared.jsx';
 
 export default function VetConsultations() {
   const { back, nav } = useNav();
@@ -26,18 +26,13 @@ export default function VetConsultations() {
   );
 
   if (consultations.length === 0) return (
-    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg, position:'relative' }}>
       <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:10 }}>
         <IconBtn icon={I.chevL} onClick={back} />
         <div style={{ fontSize:17, fontWeight:700, color:T.ink, flex:1 }}>Consultas veterinárias</div>
-        <PetHeader />
-        <button onClick={() => nav('addvet')} className="btn-press" style={{
-          border:'none', background:T.brandSoft, color:T.brand,
-          borderRadius:99, padding:'6px 14px', fontSize:13, fontWeight:700,
-          fontFamily:FONT_BODY, cursor:'pointer' }}>+ Agendar</button>
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
-        justifyContent:'center', gap:16, padding:32, textAlign:'center' }}>
+        justifyContent:'center', gap:16, padding:'0 32px 80px', textAlign:'center' }}>
         <div style={{ fontSize:64 }}>🩺</div>
         <div style={{ fontWeight:800, fontSize:18, color:T.ink, fontFamily:FONT_BODY }}>
           Nenhuma consulta registrada
@@ -45,12 +40,13 @@ export default function VetConsultations() {
         <div style={{ fontSize:14, color:T.inkSoft, fontFamily:FONT_BODY, maxWidth:260, lineHeight:1.5 }}>
           Agende e registre as consultas do seu pet para nunca perder um retorno ou check-up.
         </div>
-        <button onClick={() => nav('addvet')} style={{
-          marginTop:8, padding:'12px 28px', borderRadius:99,
-          background:T.brand, color:'#fff', border:'none',
-          fontSize:15, fontWeight:700, fontFamily:FONT_BODY, cursor:'pointer' }}>
-          + Agendar primeira consulta
-        </button>
+      </div>
+      {/* FAB */}
+      <div onClick={() => nav('addvet')}
+        style={{ position:'absolute', bottom:24, right:20, width:56, height:56, borderRadius:28,
+          background:T.ink, display:'flex', alignItems:'center', justifyContent:'center',
+          cursor:'pointer', boxShadow:'0 8px 28px -4px rgba(20,20,30,0.40)', zIndex:10 }}>
+        <I.plus size={26} color="#fff" strokeWidth={2.2} />
       </div>
     </div>
   );
@@ -61,18 +57,13 @@ export default function VetConsultations() {
   const next = sorted[0];
 
   return (
-    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg, position:'relative' }}>
       <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:10 }}>
         <IconBtn icon={I.chevL} onClick={back} />
         <div style={{ fontSize:17, fontWeight:700, color:T.ink, flex:1 }}>Consultas veterinárias</div>
-        <PetHeader />
-        <button onClick={() => nav('addvet')} className="btn-press" style={{
-          border:'none', background:T.brandSoft, color:T.brand,
-          borderRadius:99, padding:'6px 14px', fontSize:13, fontWeight:700,
-          fontFamily:FONT_BODY, cursor:'pointer' }}>+ Agendar</button>
       </div>
 
-      <div style={{ flex:1, overflowY:'auto', padding:'16px 20px 80px' }}>
+      <div style={{ flex:1, overflowY:'auto', padding:'16px 20px 96px' }}>
         {/* Hero — most recent / next */}
         {next && (
           <div style={{ borderRadius:24, padding:20, marginBottom:20,
@@ -155,6 +146,14 @@ export default function VetConsultations() {
             <div style={{ fontSize:13, color:T.inkSoft }}>Seus veterinários favoritos aparecerão aqui</div>
           </div>
         )}
+      </div>
+
+      {/* FAB */}
+      <div onClick={() => nav('addvet')}
+        style={{ position:'absolute', bottom:24, right:20, width:56, height:56, borderRadius:28,
+          background:T.ink, display:'flex', alignItems:'center', justifyContent:'center',
+          cursor:'pointer', boxShadow:'0 8px 28px -4px rgba(20,20,30,0.40)', zIndex:10 }}>
+        <I.plus size={26} color="#fff" strokeWidth={2.2} />
       </div>
     </div>
   );

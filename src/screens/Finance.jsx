@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { T, FONT_DISPLAY, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { Icon, I, Card, EmojiCircle, SectionPill, IconBtn, Eyebrow, Display, BottomNav, PetHeader } from '../components/Shared.jsx';
+import { Icon, I, Card, EmojiCircle, SectionPill, IconBtn, Eyebrow, Display, BottomNav } from '../components/Shared.jsx';
 
 const MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
@@ -57,10 +57,10 @@ function BarChart({ months, selectedKey, onSelect }) {
 
 export default function Finance() {
   const { back, nav } = useNav();
-  const { activePet, PETS, expenses } = usePet();
+  const { activePet, PETS, allPetsExpenses } = usePet();
   const currentYear = new Date().getFullYear();
   const [year, setYear]         = useState(currentYear);
-  const [selectedPetId, setSelectedPetId] = useState(null);
+  const [selectedPetId, setSelectedPetId] = useState(null); // null = Todos
   const [selectedKey, setSelectedKey] = useState(MONTH_NAMES[new Date().getMonth()].toLowerCase());
   const [search, setSearch]     = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -81,13 +81,18 @@ export default function Finance() {
 
   const fmt = v => v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 
-  // Parse expense dates and filter
-  const allExpenses = expenses.filter(e => {
+  // Filter expenses by selected pet (null = Todos = all pets)
+  const baseExpenses = useMemo(() => {
+    if (selectedPetId) return allPetsExpenses.filter(e => e.petId === selectedPetId);
+    return allPetsExpenses;
+  }, [selectedPetId, allPetsExpenses]);
+
+  // Filter by selected year
+  const allExpenses = useMemo(() => baseExpenses.filter(e => {
     if (!e.date) return false;
     const parts = e.date.split('/');
-    if (parts.length < 3) return false;
-    return parseInt(parts[2]) === year;
-  });
+    return parts.length >= 3 && parseInt(parts[2]) === year;
+  }), [baseExpenses, year]);
 
   // Build month data from real expenses
   const monthData = MONTH_NAMES.map((label, idx) => {
@@ -106,18 +111,24 @@ export default function Finance() {
   const peak     = monthData.reduce((a, b) => b.total > a.total ? b : a, monthData[0]);
   const avg      = monthData.reduce((s, m) => s + m.total, 0) / 12;
 
-  // Filtered recent expenses
-  const recentExpenses = [...expenses]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  // Filtered recent expenses (sorted by date desc)
+  const recentExpenses = useMemo(() => [...baseExpenses]
+    .sort((a, b) => {
+      const da = a.date?.split('/').reverse().join('') ?? '';
+      const db = b.date?.split('/').reverse().join('') ?? '';
+      return db.localeCompare(da);
+    })
     .filter(e => {
       if (!search) return true;
       const s = search.toLowerCase();
       return (e.desc || '').toLowerCase().includes(s) ||
-             (e.cat  || '').toLowerCase().includes(s);
+             (e.cat  || '').toLowerCase().includes(s) ||
+             (e.petName || '').toLowerCase().includes(s);
     })
-    .slice(0, 20);
+    .slice(0, 20),
+  [baseExpenses, search]);
 
-  const hasAnyExpenses = expenses.length > 0;
+  const hasAnyExpenses = allPetsExpenses.length > 0;
 
   // Category breakdown from current month
   const catMap = {};
@@ -138,7 +149,6 @@ export default function Finance() {
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg, position:'relative' }}>
       <div style={{ padding:'4px 24px 0', display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:8 }}>
         <IconBtn icon={I.chevL} onClick={back} />
-        <PetHeader />
         <div onClick={() => setShowSearch(s => !s)} style={{ cursor:'pointer' }}>
           <Icon d={I.search} size={22} color={T.ink} stroke={2} />
         </div>
@@ -159,11 +169,36 @@ export default function Finance() {
       )}
 
       <div style={{ flex:1, overflowY:'auto', padding:'18px 24px 96px' }}>
-        <Eyebrow>finanças com {activePet.name}</Eyebrow>
         <Display size={42} weight={400} style={{ marginTop:8 }}>Finanças</Display>
 
-        {/* Year + Pet filters */}
-        <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:12, flexWrap:'wrap' }}>
+        {/* Pet filter chips (Todos + per pet) — always shown when >1 pet */}
+        {PETS.length > 0 && (
+          <div style={{ display:'flex', gap:6, marginTop:14, overflowX:'auto', paddingBottom:2 }}>
+            {PETS.length > 1 && (
+              <div onClick={() => setSelectedPetId(null)} style={{ padding:'6px 14px', borderRadius:99, flexShrink:0,
+                background: !selectedPetId ? T.ink : T.surface,
+                color: !selectedPetId ? '#fff' : T.ink,
+                fontSize:12, fontWeight:700, cursor:'pointer',
+                boxShadow: !selectedPetId ? 'none' : '0 1px 2px rgba(20,20,30,0.04)' }}>
+                Todos os pets
+              </div>
+            )}
+            {PETS.map(p => (
+              <div key={p.id}
+                onClick={() => setSelectedPetId(PETS.length === 1 ? null : (p.id === selectedPetId ? null : p.id))}
+                style={{ padding:'6px 14px', borderRadius:99, flexShrink:0,
+                  background: selectedPetId === p.id || (PETS.length === 1 && !selectedPetId) ? T.ink : T.surface,
+                  color: selectedPetId === p.id || (PETS.length === 1 && !selectedPetId) ? '#fff' : T.ink,
+                  fontSize:12, fontWeight:700, cursor:'pointer',
+                  boxShadow: selectedPetId === p.id ? 'none' : '0 1px 2px rgba(20,20,30,0.04)' }}>
+                {p.name}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Year navigator */}
+        <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:10, flexWrap:'wrap' }}>
           <div style={{ display:'inline-flex', alignItems:'center', gap:6 }}>
             <div onClick={() => setYear(y => y - 1)} style={{ width:28, height:28, borderRadius:14,
               background:T.surface, display:'flex', alignItems:'center', justifyContent:'center',
@@ -179,22 +214,7 @@ export default function Finance() {
               <Icon d={I.chevR} size={14} color={T.ink} stroke={2.5} />
             </div>
           </div>
-          {PETS.length > 1 && (
-            <div style={{ display:'flex', gap:6, overflowX:'auto' }}>
-              <div onClick={() => setSelectedPetId(null)} style={{ padding:'5px 12px', borderRadius:99, flexShrink:0,
-                background: !selectedPetId ? T.brand : T.surface,
-                color: !selectedPetId ? '#fff' : T.ink,
-                fontSize:12, fontWeight:700, cursor:'pointer' }}>Todos</div>
-              {PETS.map(p => (
-                <div key={p.id} onClick={() => setSelectedPetId(p.id === selectedPetId ? null : p.id)}
-                  style={{ padding:'5px 12px', borderRadius:99, flexShrink:0,
-                    background: selectedPetId === p.id ? T.brand : T.surface,
-                    color: selectedPetId === p.id ? '#fff' : T.ink,
-                    fontSize:12, fontWeight:700, cursor:'pointer' }}>{p.name}</div>
-              ))}
-            </div>
-          )}
-          {hasAnyExpenses && (
+          {hasAnyExpenses && avg > 0 && (
             <div style={{ fontSize:12, color:T.inkSoft }}>
               média <strong style={{ color:T.ink }}>R$ {fmt(avg)}</strong>/mês
             </div>
@@ -347,7 +367,9 @@ export default function Finance() {
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontWeight:700, fontSize:14, color:T.ink, whiteSpace:'nowrap',
                     overflow:'hidden', textOverflow:'ellipsis' }}>{e.desc || e.cat}</div>
-                  <div style={{ fontSize:11, color:T.inkSoft, marginTop:1 }}>{e.cat} · {e.date}</div>
+                  <div style={{ fontSize:11, color:T.inkSoft, marginTop:1 }}>
+                    {e.cat}{!selectedPetId && e.petName ? ` · ${e.petName}` : ''} · {e.date}
+                  </div>
                 </div>
                 <div style={{ fontFamily:FONT_DISPLAY, fontSize:17, fontWeight:500, color:T.ink }}>
                   R$ {e.amount}
