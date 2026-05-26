@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { Icon, I, Card, EmojiCircle, IconBtn, Eyebrow, Display, PetHeader } from '../components/Shared.jsx';
+import { Icon, I, Card, EmojiCircle, IconCircle, IconBtn, Eyebrow, Display, PetHeader } from '../components/Shared.jsx';
 
 const TINT_MAP = {
   tintLavender: T.tintLavender,
@@ -33,7 +33,9 @@ function MedDetail({ med, onClose, onDelete }) {
           <div onClick={() => setConfirm(true)}
             style={{ width:36, height:36, borderRadius:12, background:'#FEE2E2',
               display:'flex', alignItems:'center', justifyContent:'center',
-              cursor:'pointer', fontSize:16, flexShrink:0 }}>🗑️</div>
+              cursor:'pointer', flexShrink:0 }}>
+            <I.trash size={17} color='#EF4444' strokeWidth={2} />
+          </div>
         </div>
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           {med.dose && (
@@ -88,7 +90,9 @@ function MedDetail({ med, onClose, onDelete }) {
           <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)',
             display:'flex', alignItems:'center', justifyContent:'center', zIndex:300, padding:20 }}>
             <div style={{ background:T.bg, borderRadius:20, padding:'22px 20px', maxWidth:340, width:'100%' }}>
-              <div style={{ fontSize:36, textAlign:'center', marginBottom:8 }}>🗑️</div>
+              <div style={{ display:'flex', justifyContent:'center', marginBottom:12 }}>
+                <IconCircle icon={I.trash} size={52} tint='#FEE2E2' color='#EF4444' />
+              </div>
               <div style={{ fontSize:16, fontWeight:800, color:T.ink, textAlign:'center', marginBottom:6 }}>
                 Remover {med.name}?
               </div>
@@ -194,8 +198,10 @@ export default function Meds() {
           background: fabOpen ? T.inkSoft : T.ink, color:'#fff',
           display:'flex', alignItems:'center', justifyContent:'center',
           cursor:'pointer', boxShadow:'0 8px 24px -6px rgba(20,20,30,0.4)',
-          fontSize:28, transition:'background 0.2s, transform 0.2s',
-          transform: fabOpen ? 'rotate(45deg)' : 'none', zIndex:101 }}>+</div>
+          transition:'background 0.2s, transform 0.2s',
+          transform: fabOpen ? 'rotate(45deg)' : 'none', zIndex:101 }}>
+        <I.plus size={26} color='#fff' strokeWidth={2.2} />
+      </div>
     </div>
   );
 
@@ -301,8 +307,10 @@ export default function Meds() {
           background: fabOpen ? T.inkSoft : T.ink, color:'#fff',
           display:'flex', alignItems:'center', justifyContent:'center',
           cursor:'pointer', boxShadow:'0 8px 24px -6px rgba(20,20,30,0.4)',
-          fontSize:28, transition:'background 0.2s, transform 0.2s',
-          transform: fabOpen ? 'rotate(45deg)' : 'none', zIndex:101 }}>+</div>
+          transition:'background 0.2s, transform 0.2s',
+          transform: fabOpen ? 'rotate(45deg)' : 'none', zIndex:101 }}>
+        <I.plus size={26} color='#fff' strokeWidth={2.2} />
+      </div>
 
       {detail && (
         <MedDetail

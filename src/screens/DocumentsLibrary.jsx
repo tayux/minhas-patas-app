@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { IconBtn, I, Icon, PetHeader } from '../components/Shared.jsx';
+import { IconBtn, I, Icon, IconCircle, PetHeader } from '../components/Shared.jsx';
 import { maskDate, todayStr } from '../utils/dateUtils.js';
 
 const CATS = ['Todos','Receitas','Exames','Vacinas','Cirurgias','Outros'];
@@ -140,7 +140,9 @@ function DetailModal({ doc, onClose, onDelete }) {
             <div onClick={() => { onDelete(doc.id); onClose(); }}
               style={{ width:36, height:36, borderRadius:12, background:'#FEE2E2',
                 display:'flex', alignItems:'center', justifyContent:'center',
-                cursor:'pointer', fontSize:16, flexShrink:0 }}>🗑️</div>
+                cursor:'pointer', flexShrink:0 }}>
+              <I.trash size={17} color='#EF4444' strokeWidth={2} />
+            </div>
           )}
         </div>
         {doc.date && (

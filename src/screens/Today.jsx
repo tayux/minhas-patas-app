@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { T, FONT_BODY, FONT_DISPLAY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { Icon, I, Card, EmojiCircle, SectionPill, CheckBubble, IconBtn, Display, BottomNav, PetHeader } from '../components/Shared.jsx';
+import { Icon, I, Card, EmojiCircle, IconCircle, SectionPill, CheckBubble, IconBtn, Display, BottomNav, PetHeader } from '../components/Shared.jsx';
 import { markOccurrenceComplete, isCalendarConnected } from '../utils/googleCalendar.js';
 
 const MONTHS_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
@@ -85,7 +85,9 @@ function MedDetailModal({ med, onClose, onSave, onDelete }) {
           <div onClick={() => setConfirm(true)}
             style={{ width:36, height:36, borderRadius:12, background:'#FEE2E2',
               display:'flex', alignItems:'center', justifyContent:'center',
-              cursor:'pointer', fontSize:16, flexShrink:0 }}>🗑️</div>
+              cursor:'pointer', flexShrink:0 }}>
+            <I.trash size={17} color='#EF4444' strokeWidth={2} />
+          </div>
         </div>
 
         <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
@@ -186,7 +188,9 @@ function MedDetailModal({ med, onClose, onSave, onDelete }) {
           <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)',
             display:'flex', alignItems:'center', justifyContent:'center', zIndex:300, padding:20 }}>
             <div style={{ background:T.bg, borderRadius:20, padding:'22px 20px', maxWidth:340, width:'100%' }}>
-              <div style={{ fontSize:36, textAlign:'center', marginBottom:8 }}>🗑️</div>
+              <div style={{ display:'flex', justifyContent:'center', marginBottom:12 }}>
+                <IconCircle icon={I.trash} size={52} tint='#FEE2E2' color='#EF4444' />
+              </div>
               <div style={{ fontSize:16, fontWeight:800, color:T.ink, textAlign:'center', marginBottom:6 }}>
                 Remover {med.name}?
               </div>

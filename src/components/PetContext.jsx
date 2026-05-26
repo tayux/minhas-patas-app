@@ -351,12 +351,12 @@ export function PetProvider({ children }) {
         const dbPets = await res.json();
         if (cancelled) return;
 
-        if (dbPets.length > 0) {
-          const uiPets = dbPets.map(dbPetToUi);
-          setPets(uiPets);
-          setActivePetId(uiPets[0].id);
-        }
-        // If DB returns 0 pets, keep showing PETS_FALLBACK so the app is never blank
+        // Always replace state with real DB data — even an empty array.
+        // PETS_FALLBACK is only valid before the first DB response (loading splash).
+        // Showing fallback pets to a user who has none is misleading and must be avoided.
+        const uiPets = dbPets.map(dbPetToUi);
+        setPets(uiPets);
+        setActivePetId(uiPets[0]?.id ?? null);
       } catch (err) {
         console.warn('API indisponível, usando dados locais:', err.message);
       } finally {
@@ -782,6 +782,10 @@ export function PetProvider({ children }) {
     removeFromList('documents', id);
     if (pid) fetch(`/api/pets/${pid}/health?recordId=${id}`, { method: 'DELETE' }).catch(() => {});
   };
+  const diaryEntries     = getList('diaryEntries');
+  const addDiaryEntry    = (entry) => addToList('diaryEntries', entry);
+  const updateDiaryEntry = (id, patch) => updateItem('diaryEntries', id, patch);
+
   const feedbacks      = getList('feedbacks');
   const addFeedback    = (fb) => addToList('feedbacks', fb);
   const feedingConfig  = pid ? (petData[pid]?.feedingConfig || null) : null;
@@ -800,6 +804,7 @@ export function PetProvider({ children }) {
       hygieneRecords, addHygieneRecord, deleteHygieneRecord,
       healthRecords, addHealthRecord, deleteHealthRecord, saveExamExplanation,
       documents, addDocument, deleteDocument,
+      diaryEntries, addDiaryEntry, updateDiaryEntry,
       feedbacks, addFeedback,
       feedingConfig, setFeedingConfig,
       todayTasks, setTodayTasks,

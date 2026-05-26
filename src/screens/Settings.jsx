@@ -74,15 +74,14 @@ export default function Settings() {
 
       <div style={{ flex:1, overflowY:'auto', padding:'16px 20px 100px' }}>
         {/* Profile */}
-        <div onClick={() => nav('notifications')} style={{ background:T.surface, borderRadius:20, padding:'16px 20px',
+        <div style={{ background:T.surface, borderRadius:20, padding:'16px 20px',
           display:'flex', alignItems:'center', gap:14, marginBottom:20,
-          boxShadow:'0 4px 20px rgba(20,20,30,0.07)', cursor:'pointer' }}>
+          boxShadow:'0 4px 20px rgba(20,20,30,0.07)' }}>
           <UserAvatar size={52} name={user?.name ?? 'T'} picture={user?.picture} hue={28} />
           <div style={{ flex:1 }}>
             <div style={{ fontSize:16, fontWeight:700, color:T.ink }}>{user?.name ?? '—'}</div>
             <div style={{ fontSize:13, color:T.inkSoft }}>{user?.email ?? '—'}</div>
           </div>
-          <Icon d={I.chevR} size={16} color={T.inkSoft} />
         </div>
 
         {/* Premium */}
