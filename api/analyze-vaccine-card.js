@@ -71,11 +71,10 @@ Se não for um cartão de vacinação legível ou a imagem estiver muito borrada
     if (!claudeRes.ok) {
       const detail = await claudeRes.text();
       console.error('Claude error (vaccine-card):', claudeRes.status, detail);
-      // Return full error details to help diagnose the issue
-      return res.status(502).json({
-        error: 'Erro ao contatar a IA. Tente novamente.',
-        _debug: { status: claudeRes.status, body: detail.slice(0, 500) },
-      });
+      const msg = claudeRes.status === 401
+        ? 'Chave de API inválida. Contate o suporte.'
+        : 'Erro ao contatar a IA. Tente novamente.';
+      return res.status(502).json({ error: msg });
     }
     const data = await claudeRes.json();
     const text = data.content?.[0]?.text || '';

@@ -67,7 +67,10 @@ Se não for uma receita veterinária legível: {"medications":[],"vet":null,"crm
     if (!claudeRes.ok) {
       const detail = await claudeRes.text();
       console.error('Claude error (prescription):', claudeRes.status, detail);
-      return res.status(502).json({ error: 'Erro ao contatar a IA. Tente novamente.' });
+      const msg = claudeRes.status === 401
+        ? 'Chave de API inválida. Contate o suporte.'
+        : 'Erro ao contatar a IA. Tente novamente.';
+      return res.status(502).json({ error: msg });
     }
     const data = await claudeRes.json();
     const text = data.content?.[0]?.text || '';
@@ -114,7 +117,10 @@ Se não for um exame legível: {"error":"Não foi possível identificar um exame
     if (!claudeRes.ok) {
       const detail = await claudeRes.text();
       console.error('Claude error (exam):', claudeRes.status, detail);
-      return res.status(502).json({ error: 'Erro ao contatar a IA. Tente novamente.' });
+      const msg = claudeRes.status === 401
+        ? 'Chave de API inválida. Contate o suporte.'
+        : 'Erro ao contatar a IA. Tente novamente.';
+      return res.status(502).json({ error: msg });
     }
     const data = await claudeRes.json();
     const text = data.content?.[0]?.text || '';
