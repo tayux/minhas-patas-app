@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { IconBtn, I } from '../components/Shared.jsx';
+import { IconBtn, I, PetHeader } from '../components/Shared.jsx';
 import { maskDate, todayStr } from '../utils/dateUtils.js';
 
 const CARE_TYPES = [
@@ -99,10 +99,59 @@ function AddForm({ onSave, onCancel }) {
   );
 }
 
+function DetailModal({ record, onClose }) {
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)',
+      display:'flex', alignItems:'flex-end', zIndex:200 }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ width:'100%', background:T.bg, borderRadius:'24px 24px 0 0',
+        padding:'24px 20px 40px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:20 }}>
+          <div style={{ fontSize:40 }}>{record.emoji}</div>
+          <div>
+            <div style={{ fontSize:18, fontWeight:800, color:T.ink }}>{record.type}</div>
+            <div style={{ fontSize:13, color:T.inkSoft, marginTop:2 }}>
+              {record.date || 'Data não informada'}
+            </div>
+          </div>
+        </div>
+        <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          {record.date && (
+            <div style={{ display:'flex', justifyContent:'space-between', padding:'12px 16px',
+              background:T.bgWash, borderRadius:14 }}>
+              <span style={{ fontSize:13, fontWeight:600, color:T.inkSoft }}>Data</span>
+              <span style={{ fontSize:13, fontWeight:700, color:T.ink }}>{record.date}</span>
+            </div>
+          )}
+          {record.price && (
+            <div style={{ display:'flex', justifyContent:'space-between', padding:'12px 16px',
+              background:'#DCFCE7', borderRadius:14 }}>
+              <span style={{ fontSize:13, fontWeight:600, color:'#16A34A' }}>Valor</span>
+              <span style={{ fontSize:13, fontWeight:700, color:'#16A34A' }}>R$ {record.price}</span>
+            </div>
+          )}
+          {record.notes && (
+            <div style={{ background:T.bgWash, borderRadius:14, padding:'12px 16px' }}>
+              <div style={{ fontSize:12, fontWeight:600, color:T.inkSoft, marginBottom:4 }}>Observações</div>
+              <div style={{ fontSize:13, color:T.ink, lineHeight:1.5 }}>{record.notes}</div>
+            </div>
+          )}
+        </div>
+        <button onClick={onClose} style={{ width:'100%', height:48, borderRadius:99, marginTop:20,
+          background:T.surface, color:T.ink, border:'none',
+          fontSize:14, fontWeight:600, fontFamily:FONT_BODY, cursor:'pointer' }}>
+          Fechar
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function HygieneGrooming() {
   const { back } = useNav();
   const { activePet, hygieneRecords, addHygieneRecord } = usePet();
   const [showForm, setShowForm] = useState(false);
+  const [detail, setDetail] = useState(null);
 
   const handleSave = (rec) => {
     addHygieneRecord(rec);
@@ -114,15 +163,11 @@ export default function HygieneGrooming() {
   );
 
   return (
-    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg, position:'relative' }}>
       <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:12 }}>
         <IconBtn icon={I.chevL} onClick={back} />
-        <div style={{ fontSize:17, fontWeight:700, color:T.ink }}>Higiene & Beleza</div>
-        <div style={{ flex:1 }} />
-        <button onClick={() => setShowForm(true)} className="btn-press" style={{
-          border:'none', background:T.brandSoft, color:T.brand,
-          borderRadius:99, padding:'6px 14px', fontSize:13, fontWeight:700,
-          fontFamily:FONT_BODY, cursor:'pointer' }}>+ Registrar</button>
+        <div style={{ fontSize:17, fontWeight:700, color:T.ink, flex:1 }}>Higiene & Beleza</div>
+        <PetHeader />
       </div>
 
       {hygieneRecords.length === 0 ? (
@@ -135,20 +180,15 @@ export default function HygieneGrooming() {
           <div style={{ fontSize:14, color:T.inkSoft, fontFamily:FONT_BODY, maxWidth:260, lineHeight:1.5 }}>
             Registre banhos, tosas, cuidados com orelhas, unhas e dentes do seu pet.
           </div>
-          <button onClick={() => setShowForm(true)} style={{
-            marginTop:8, padding:'12px 28px', borderRadius:99,
-            background:T.brand, color:'#fff', border:'none',
-            fontSize:15, fontWeight:700, fontFamily:FONT_BODY, cursor:'pointer' }}>
-            + Registrar primeiro cuidado
-          </button>
         </div>
       ) : (
-        <div style={{ flex:1, overflowY:'auto', padding:'16px 20px 80px' }}>
+        <div style={{ flex:1, overflowY:'auto', padding:'16px 20px 96px' }}>
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
             {sorted.map((r) => (
-              <div key={r.id} style={{ background:T.surface, borderRadius:16, padding:'14px 16px',
-                display:'flex', alignItems:'center', gap:12,
-                boxShadow:'0 2px 8px rgba(20,20,30,0.05)' }}>
+              <div key={r.id} onClick={() => setDetail(r)}
+                style={{ background:T.surface, borderRadius:16, padding:'14px 16px',
+                  display:'flex', alignItems:'center', gap:12, cursor:'pointer',
+                  boxShadow:'0 2px 8px rgba(20,20,30,0.05)' }}>
                 <div style={{ fontSize:28 }}>{r.emoji}</div>
                 <div style={{ flex:1 }}>
                   <div style={{ fontSize:14, fontWeight:700, color:T.ink }}>{r.type}</div>
@@ -167,7 +207,15 @@ export default function HygieneGrooming() {
         </div>
       )}
 
+      {/* FAB */}
+      <div onClick={() => setShowForm(true)}
+        style={{ position:'absolute', bottom:24, right:20, width:56, height:56, borderRadius:28,
+          background:T.ink, display:'flex', alignItems:'center', justifyContent:'center',
+          fontSize:28, color:'#fff', cursor:'pointer',
+          boxShadow:'0 8px 24px -6px rgba(20,20,30,0.4)', zIndex:10 }}>+</div>
+
       {showForm && <AddForm onSave={handleSave} onCancel={() => setShowForm(false)} />}
+      {detail && <DetailModal record={detail} onClose={() => setDetail(null)} />}
     </div>
   );
 }

@@ -94,6 +94,20 @@ export default async function handler(req, res) {
         created_at TIMESTAMPTZ DEFAULT NOW()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS feedbacks (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        category TEXT DEFAULT 'Geral',
+        comment TEXT,
+        rating_label TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `;
+    // Migrations — safe to run on every setup call
+    await sql`ALTER TABLE health_records ADD COLUMN IF NOT EXISTS ai_explanation JSONB`;
+
     res.status(200).json({ ok: true, message: 'Schema criado com sucesso' });
   } catch (err) {
     console.error(err);

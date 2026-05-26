@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { IconBtn, I } from '../components/Shared.jsx';
+import { IconBtn, I, MascotAvatar } from '../components/Shared.jsx';
 import { maskDate, todayStr } from '../utils/dateUtils.js';
 
 const CATS = [
@@ -22,15 +22,17 @@ const inputStyle = {
 
 export default function AddExpense() {
   const { back } = useNav();
-  const { addExpense } = usePet();
+  const { activePet, PETS, addExpenseForPet } = usePet();
+  const [selectedPetId, setSelectedPetId] = useState(activePet?.id || null);
   const [catIdx, setCat]    = useState(null);
   const [desc, setDesc]     = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate]     = useState(todayStr());
 
   const handleSave = () => {
-    if (amount.trim()) {
-      addExpense({
+    const petId = selectedPetId || activePet?.id;
+    if (amount.trim() && petId) {
+      addExpenseForPet(petId, {
         cat: catIdx !== null ? CATS[catIdx].l : 'Outros',
         emoji: catIdx !== null ? CATS[catIdx].e : '📋',
         desc: desc.trim(),
@@ -49,6 +51,28 @@ export default function AddExpense() {
       </div>
 
       <div style={{ flex:1, overflowY:'auto', padding:'20px 20px 100px' }}>
+        {PETS.length > 1 && (
+          <div style={{ marginBottom:20 }}>
+            <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:10 }}>Pet</div>
+            <div style={{ display:'flex', gap:8, overflowX:'auto', paddingBottom:4 }}>
+              {PETS.map(p => {
+                const sel = p.id === selectedPetId;
+                return (
+                  <div key={p.id} onClick={() => setSelectedPetId(p.id)}
+                    style={{ display:'flex', alignItems:'center', gap:7,
+                      padding:'6px 14px 6px 6px', borderRadius:99, flexShrink:0, cursor:'pointer',
+                      background: sel ? T.ink : T.surface,
+                      color: sel ? '#fff' : T.ink,
+                      boxShadow: sel ? 'none' : '0 1px 4px rgba(20,20,30,0.06)',
+                      fontWeight:700, fontSize:13, fontFamily:FONT_BODY }}>
+                    <MascotAvatar size={26} hue={p.hue} photo={p.photo} photoUrl={p.photoUrl} />
+                    {p.name}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <div style={{ marginBottom:24 }}>
           <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginBottom:12 }}>Categoria</div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10 }}>

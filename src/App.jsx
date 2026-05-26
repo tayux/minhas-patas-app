@@ -31,6 +31,10 @@ import ReportsExport    from './screens/ReportsExport.jsx';
 import AddExpense       from './screens/AddExpense.jsx';
 import AddVaccine       from './screens/AddVaccine.jsx';
 import AddVetConsultation from './screens/AddVetConsultation.jsx';
+import EditPet            from './screens/EditPet.jsx';
+import ManagePets         from './screens/ManagePets.jsx';
+import AppFeedback        from './screens/AppFeedback.jsx';
+import InstallPrompt      from './components/InstallPrompt.jsx';
 
 const SCREENS = {
   onboarding:     { component: Onboarding,       dark: false, modal: false },
@@ -59,6 +63,9 @@ const SCREENS = {
   addexpense:     { component: AddExpense,        dark: false, modal: true  },
   addvaccine:     { component: AddVaccine,        dark: false, modal: true  },
   addvet:         { component: AddVetConsultation,dark: false, modal: true  },
+  editpet:        { component: EditPet,          dark: false, modal: true  },
+  managepets:     { component: ManagePets,       dark: false, modal: false },
+  appfeedback:    { component: AppFeedback,      dark: false, modal: true  },
 };
 
 export default function App() {
@@ -109,6 +116,7 @@ export default function App() {
                 <Screen />
               </div>
             </PhoneShell>
+            <InstallPrompt />
           </div>
         </div>
       </PetProvider>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { IconBtn, I } from '../components/Shared.jsx';
+import { IconBtn, I, PetHeader } from '../components/Shared.jsx';
 
 export default function VetConsultations() {
   const { back, nav } = useNav();
@@ -27,10 +27,10 @@ export default function VetConsultations() {
 
   if (consultations.length === 0) return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
-      <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:12 }}>
+      <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:10 }}>
         <IconBtn icon={I.chevL} onClick={back} />
-        <div style={{ fontSize:17, fontWeight:700, color:T.ink }}>Consultas veterinárias</div>
-        <div style={{ flex:1 }} />
+        <div style={{ fontSize:17, fontWeight:700, color:T.ink, flex:1 }}>Consultas veterinárias</div>
+        <PetHeader />
         <button onClick={() => nav('addvet')} className="btn-press" style={{
           border:'none', background:T.brandSoft, color:T.brand,
           borderRadius:99, padding:'6px 14px', fontSize:13, fontWeight:700,
@@ -62,10 +62,10 @@ export default function VetConsultations() {
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
-      <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:12 }}>
+      <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:10 }}>
         <IconBtn icon={I.chevL} onClick={back} />
-        <div style={{ fontSize:17, fontWeight:700, color:T.ink }}>Consultas veterinárias</div>
-        <div style={{ flex:1 }} />
+        <div style={{ fontSize:17, fontWeight:700, color:T.ink, flex:1 }}>Consultas veterinárias</div>
+        <PetHeader />
         <button onClick={() => nav('addvet')} className="btn-press" style={{
           border:'none', background:T.brandSoft, color:T.brand,
           borderRadius:99, padding:'6px 14px', fontSize:13, fontWeight:700,

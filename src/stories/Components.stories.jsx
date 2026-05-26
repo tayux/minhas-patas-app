@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import {
-  Card, IconBtn, EmojiCircle, CheckBubble, SectionPill,
+  Card, IconBtn, EmojiCircle, IconCircle, CheckBubble, SectionPill,
   Display, Eyebrow, UserAvatar, MascotAvatar, Stripe,
   Icon, I,
 } from '../components/Shared.jsx';
+import { Stethoscope, Pill, Coins, FolderOpen } from 'lucide-react';
 
 export default {
   title: 'Design System/Components',
@@ -53,16 +54,18 @@ export const Cards = {
         </Card>
       </Col>
 
-      <Col label="Tile (112px)">
+      <Col label="Tile (112px) — com IconCircle">
         <Row>
           {[
-            { label: 'Saúde',      emoji: '❤️', tint: T.tintRose },
-            { label: 'Medicamentos', emoji: '💊', tint: T.tintLavender },
+            { label: 'Saúde',        icon: Stethoscope, tint: T.tintRose,     ink: T.tintRoseInk     },
+            { label: 'Medicamentos', icon: Pill,         tint: T.tintLavender, ink: T.tintLavenderInk },
+            { label: 'Finanças',     icon: Coins,        tint: T.tintMint,     ink: T.tintMintInk     },
+            { label: 'Documentos',   icon: FolderOpen,   tint: T.tintCream,    ink: T.tintCreamInk    },
           ].map(t => (
             <Card key={t.label} pad={16} radius={22} onClick={() => {}} className="pressable"
               style={{ display: 'flex', flexDirection: 'column', gap: 16, height: 112,
                 width: 148, cursor: 'pointer' }}>
-              <EmojiCircle emoji={t.emoji} size={36} tint={t.tint} />
+              <IconCircle icon={t.icon} size={36} tint={t.tint} color={t.ink} />
               <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 15, color: T.ink }}>
                 {t.label}
               </div>
@@ -139,6 +142,67 @@ export const EmojiCircles = {
   ),
 };
 
+// ─── IconCircle ──────────────────────────────────────────────────────────────
+
+export const IconCircles = {
+  name: 'IconCircle',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <Col label="Tints (Lucide icons)">
+        <Row>
+          {[
+            { icon: I.health,   tint: T.tintRose,     ink: T.tintRoseInk,     name: 'health'   },
+            { icon: I.meds,     tint: T.tintLavender, ink: T.tintLavenderInk, name: 'meds'     },
+            { icon: I.finance,  tint: T.tintMint,     ink: T.tintMintInk,     name: 'finance'  },
+            { icon: I.docs,     tint: T.tintCream,    ink: T.tintCreamInk,    name: 'docs'     },
+            { icon: I.vaccine,  tint: T.tintSky,      ink: T.tintSkyInk,      name: 'vaccine'  },
+            { icon: I.alert,    tint: '#FEF3C7',      ink: '#B45309',         name: 'alert'    },
+            { icon: I.exam,     tint: T.tintSky,      ink: T.tintSkyInk,      name: 'exam'     },
+            { icon: I.sparkles, tint: '#EDE9FE',      ink: '#7C3AED',         name: 'sparkles' },
+          ].map(({ icon, tint, ink, name }) => (
+            <Col key={name} label={name}>
+              <IconCircle icon={icon} size={44} tint={tint} color={ink} />
+            </Col>
+          ))}
+        </Row>
+      </Col>
+
+      <Col label="Tamanhos">
+        <Row gap={16} style={{ alignItems: 'flex-end' }}>
+          {[28, 36, 44, 56].map(size => (
+            <Col key={size} label={`${size}px`}>
+              <IconCircle icon={I.health} size={size} tint={T.tintRose} color={T.tintRoseInk} />
+            </Col>
+          ))}
+        </Row>
+      </Col>
+    </div>
+  ),
+};
+
+// ─── All Icons Grid ───────────────────────────────────────────────────────────
+
+export const AllIcons = {
+  name: 'All Icons (I.*)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ fontFamily: FONT_BODY, fontSize: 13, color: T.inkSoft }}>
+        Todos os ícones do objeto <code>I</code> de Shared.jsx (lucide-react)
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {Object.entries(I).map(([name, LucideIcon]) => (
+          <div key={name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
+            gap: 6, padding: '12px 8px', background: T.surface, borderRadius: 12, minWidth: 64 }}>
+            <Icon d={LucideIcon} size={24} color={T.ink} />
+            <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: T.inkMute,
+              textAlign: 'center' }}>{name}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+};
+
 // ─── CheckBubble ─────────────────────────────────────────────────────────────
 
 export const CheckBubbles = {
@@ -182,9 +246,9 @@ export const SectionPills = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {[
-        { icon: '⏰', label: 'Próximas doses',   count: 3,  tint: T.tintLavender, ink: T.tintLavenderInk },
-        { icon: '❤️', label: 'Histórico de saúde', count: 12, tint: T.tintRose,     ink: T.tintRoseInk },
-        { icon: '🏃', label: 'Atividades',        count: 5,  tint: T.tintMint,     ink: T.tintMintInk },
+        { icon: I.clock,    label: 'Próximas doses',    count: 3,  tint: T.tintLavender, ink: T.tintLavenderInk },
+        { icon: I.health,   label: 'Histórico de saúde', count: 12, tint: T.tintRose,     ink: T.tintRoseInk },
+        { icon: I.activity, label: 'Atividades',         count: 5,  tint: T.tintMint,     ink: T.tintMintInk },
       ].map(p => (
         <SectionPill key={p.label} icon={p.icon} label={p.label}
           count={p.count} tint={p.tint} ink={p.ink} />

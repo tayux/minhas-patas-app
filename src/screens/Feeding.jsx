@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
-import { IconBtn, I } from '../components/Shared.jsx';
+import { IconBtn, I, PetHeader } from '../components/Shared.jsx';
 
 const inputStyle = {
   width:'100%', border:'none', outline:'none', background:'transparent',
@@ -139,7 +139,8 @@ export default function Feeding() {
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
       <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:12 }}>
         <IconBtn icon={I.chevL} onClick={back} />
-        <div style={{ fontSize:17, fontWeight:700, color:T.ink }}>Alimentação</div>
+        <div style={{ fontSize:17, fontWeight:700, color:T.ink, flex:1 }}>Alimentação</div>
+        <PetHeader />
       </div>
       <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
         justifyContent:'center', gap:16, padding:32, textAlign:'center' }}>

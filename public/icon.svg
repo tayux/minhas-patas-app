@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Full square background — Android aplica o arredondamento por conta própria -->
+  <rect width="512" height="512" fill="#7C6BFC"/>
+
+  <!-- Paw pads (white) -->
+  <!-- Top-left toe -->
+  <ellipse cx="168" cy="172" rx="38" ry="46" fill="white"/>
+  <!-- Top-right toe -->
+  <ellipse cx="344" cy="172" rx="38" ry="46" fill="white"/>
+  <!-- Middle-left toe -->
+  <ellipse cx="218" cy="138" rx="34" ry="42" fill="white"/>
+  <!-- Middle-right toe -->
+  <ellipse cx="294" cy="138" rx="34" ry="42" fill="white"/>
+  <!-- Main pad (large) -->
+  <ellipse cx="256" cy="318" rx="98" ry="90" fill="white"/>
+</svg>

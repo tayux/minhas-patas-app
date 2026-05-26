@@ -1,9 +1,28 @@
+import { useState, useEffect } from 'react';
 import { T, FONT_DISPLAY, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
 import { Icon, I } from '../components/Shared.jsx';
 
+const DAYS_PT   = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+const MONTHS_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+function formatClock(d) {
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function formatDatePt(d) {
+  return `${DAYS_PT[d.getDay()]}, ${d.getDate()} de ${MONTHS_PT[d.getMonth()]}`;
+}
+
 export default function LockNotif() {
   const { nav } = useNav();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    // Update every 30 s so clock stays fresh
+    const id = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div style={{ height:'100%', position:'relative', overflow:'hidden',
       background:'linear-gradient(170deg, #C9BEFF 0%, #B3A6FF 40%, #9E8FF7 100%)' }}>
@@ -19,9 +38,9 @@ export default function LockNotif() {
       </div>
       <div style={{ textAlign:'center', color:T.ink, paddingTop:92 }}>
         <div style={{ fontFamily:FONT_DISPLAY, fontSize:18, fontStyle:'italic', fontWeight:400,
-          opacity:0.75, letterSpacing:0.2 }}>segunda-feira, 14 de maio</div>
+          opacity:0.75, letterSpacing:0.2 }}>{formatDatePt(now)}</div>
         <div style={{ fontFamily:FONT_DISPLAY, fontSize:96, fontWeight:300, lineHeight:1,
-          marginTop:4, letterSpacing:-3 }}>15:00</div>
+          marginTop:4, letterSpacing:-3 }}>{formatClock(now)}</div>
       </div>
       <div style={{ padding:'40px 14px 0' }}>
         <div onClick={() => nav('home')} style={{ background:'rgba(255,255,255,0.78)',

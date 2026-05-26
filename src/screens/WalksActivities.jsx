@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { T, FONT_BODY } from '../theme.js';
 import { useNav } from '../components/NavContext.jsx';
-import { IconBtn, I } from '../components/Shared.jsx';
+import { IconBtn, I, PetHeader } from '../components/Shared.jsx';
 
 const DOW = ['S','T','Q','Q','S','S','D'];
 const DONE_DAYS = [0,1,2];
@@ -22,7 +22,8 @@ export default function WalksActivities() {
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:T.bg }}>
       <div style={{ padding:'12px 20px 0', display:'flex', alignItems:'center', gap:12 }}>
         <IconBtn icon={I.chevL} onClick={back} />
-        <div style={{ fontSize:17, fontWeight:700, color:T.ink }}>Passeios & Atividades</div>
+        <div style={{ fontSize:17, fontWeight:700, color:T.ink, flex:1 }}>Passeios & Atividades</div>
+        <PetHeader />
       </div>
 
       <div style={{ flex:1, overflowY:'auto', padding:'16px 20px 80px' }}>

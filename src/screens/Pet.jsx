@@ -89,7 +89,7 @@ export default function Pet() {
             </div>
           ))}
         </Card>
-        <button onClick={() => nav('petonboarding')} style={{ marginTop:14, width:'100%', height:52, borderRadius:99,
+        <button onClick={() => nav('editpet')} style={{ marginTop:14, width:'100%', height:52, borderRadius:99,
           background:T.surface, color:T.ink, border:'none', fontFamily:FONT_BODY,
           fontSize:14, fontWeight:600, display:'flex', alignItems:'center',
           justifyContent:'center', gap:8, cursor:'pointer',

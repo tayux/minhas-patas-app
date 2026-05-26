@@ -18,6 +18,29 @@ export function todayStr() {
   return `${d}/${m}/${now.getFullYear()}`;
 }
 
+// Convert dd/mm/yyyy (UI) → yyyy-mm-dd (DB/ISO) — returns null if input is falsy
+export function ddmmToIso(dateStr) {
+  if (!dateStr) return null;
+  // Already ISO?
+  if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) return dateStr.slice(0, 10);
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return null;
+  const [dd, mm, yyyy] = parts;
+  if (!dd || !mm || !yyyy || yyyy.length < 4) return null;
+  return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+}
+
+// Convert yyyy-mm-dd or ISO timestamp (DB) → dd/mm/yyyy (UI display)
+export function isoToDdmm(isoStr) {
+  if (!isoStr) return null;
+  const str = String(isoStr).slice(0, 10); // take only date portion
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    const [yyyy, mm, dd] = str.split('-');
+    return `${dd}/${mm}/${yyyy}`;
+  }
+  return isoStr; // already dd/mm/yyyy or unknown — return as-is
+}
+
 // Parse dd/mm/aaaa → year integer (returns null if invalid)
 export function parseYear(dateStr) {
   if (!dateStr) return null;

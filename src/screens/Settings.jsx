@@ -34,9 +34,16 @@ export default function Settings() {
   const [toggles, setToggles] = useState({ push:true, alarm:false, biometric:true });
   const t = (k) => v => setToggles(s => ({ ...s, [k]:v }));
 
+  const shareWhatsApp = () => {
+    const msg = encodeURIComponent(
+      '🐾 Conheça o *MinhasPatas* — o app completo para cuidar do seu pet!\n\nControle vacinas, medicamentos, consultas, alimentação e muito mais em um só lugar.\n\nBaixe agora: https://minhaspatas.app'
+    );
+    window.open(`https://wa.me/?text=${msg}`, '_blank');
+  };
+
   const sections = [
     { title:'Pets', rows:[
-      { e:'🐾', label:'Gerenciar pets', arrow:true, onClick:() => nav('pet') },
+      { e:'🐾', label:'Gerenciar pets', arrow:true, onClick:() => nav('managepets') },
       { e:'➕', label:'Adicionar novo pet', arrow:true, onClick:() => nav('petonboarding') },
     ]},
     { title:'Notificações & Alarmes', rows:[
@@ -46,7 +53,6 @@ export default function Settings() {
     { title:'Conta & Segurança', rows:[
       { e:'🔒', label:'Alterar senha', arrow:true, onClick:() => nav('notifications') },
       { e:'👆', label:'Biometria', toggle:true, key:'biometric' },
-      { e:'🛡️', label:'Privacidade', arrow:true, onClick:() => nav('notifications') },
     ]},
     { title:'Dados & Privacidade', rows:[
       { e:'📤', label:'Exportar dados', arrow:true, onClick:() => nav('reports') },
@@ -54,7 +60,8 @@ export default function Settings() {
     ]},
     { title:'Sobre', rows:[
       { e:'ℹ️', label:'Versão 1.0.0' },
-      { e:'⭐', label:'Avaliar o app', arrow:true },
+      { e:'⭐', label:'Avaliar o app', arrow:true, onClick:() => nav('appfeedback') },
+      { e:'💬', label:'Compartilhar via WhatsApp', arrow:true, onClick: shareWhatsApp },
     ]},
   ];
 
