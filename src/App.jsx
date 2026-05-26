@@ -3,7 +3,8 @@ import { NavCtx } from './components/NavContext.jsx';
 import { PetProvider } from './components/PetContext.jsx';
 import { useAuth } from './components/AuthContext.jsx';
 import { PhoneShell } from './components/Shared.jsx';
-import { T } from './theme.js';
+import { T, FONT_BODY, FONT_DISPLAY } from './theme.js';
+import { getPendingChangelog, markVersionSeen } from './utils/changelog.js';
 
 import Onboarding       from './screens/Onboarding.jsx';
 import Home             from './screens/Home.jsx';
@@ -68,9 +69,64 @@ const SCREENS = {
   appfeedback:    { component: AppFeedback,      dark: false, modal: true  },
 };
 
+// ── What's New sheet ────────────────────────────────────────────────────────
+function WhatsNewSheet({ changelog, onClose }) {
+  return (
+    <div style={{
+      position: 'fixed', inset: 0,
+      background: 'rgba(0,0,0,0.55)',
+      display: 'flex', alignItems: 'flex-end',
+      zIndex: 9999,
+    }} onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{
+        width: '100%', background: '#fff',
+        borderRadius: '28px 28px 0 0',
+        padding: '28px 24px 40px',
+        maxHeight: '80dvh', overflowY: 'auto',
+      }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <div style={{ fontSize: 48, marginBottom: 8 }}>{changelog.emoji}</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: T.ink, fontFamily: FONT_DISPLAY, fontStyle: 'italic' }}>
+            {changelog.title}
+          </div>
+          <div style={{ fontSize: 13, color: T.inkSoft, marginTop: 4, fontFamily: FONT_BODY }}>
+            Versão atualizada em {changelog.date}
+          </div>
+        </div>
+
+        {/* Feature list */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+          {changelog.features.map((f, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 14,
+              background: T.bgWash, borderRadius: 16, padding: '12px 16px',
+            }}>
+              <div style={{ fontSize: 22, flexShrink: 0, marginTop: 1 }}>{f.emoji}</div>
+              <div style={{ fontSize: 14, color: T.ink, fontFamily: FONT_BODY, lineHeight: 1.45 }}>
+                {f.text}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <button onClick={onClose} style={{
+          width: '100%', height: 52, borderRadius: 99, border: 'none',
+          background: T.ink, color: '#fff',
+          fontSize: 16, fontWeight: 700, fontFamily: FONT_BODY, cursor: 'pointer',
+        }}>
+          Entendido! 🐾
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const { user } = useAuth();
   const [screen, setScreen]       = useState(() => user ? 'home' : 'onboarding');
+  const [whatsNew, setWhatsNew]   = useState(() => getPendingChangelog());
   const [history, setHistory]     = useState([]);
   const [direction, setDirection] = useState('forward');
   const [screenKey, setScreenKey] = useState(0);
@@ -117,6 +173,12 @@ export default function App() {
               </div>
             </PhoneShell>
             <InstallPrompt />
+            {whatsNew && (
+              <WhatsNewSheet
+                changelog={whatsNew}
+                onClose={() => { markVersionSeen(); setWhatsNew(null); }}
+              />
+            )}
           </div>
         </div>
       </PetProvider>

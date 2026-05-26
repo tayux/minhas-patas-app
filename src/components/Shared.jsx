@@ -10,7 +10,7 @@ import {
   Activity, DollarSign, Notebook, ClipboardList,
   CheckCircle2, RotateCcw, Sparkles,
   Lock, Fingerprint, Upload, Info, Star, Share2, LogOut,
-  UtensilsCrossed, MessageCircle,
+  UtensilsCrossed, MessageCircle, Camera,
 } from 'lucide-react';
 import { T, FONT_DISPLAY, FONT_BODY } from '../theme.js';
 import { useNav } from './NavContext.jsx';
@@ -70,6 +70,7 @@ export const I = {
   logout:    LogOut,
   utensils:  UtensilsCrossed,
   chat:      MessageCircle,
+  camera:    Camera,
 };
 
 // ── Icon renderer ─────────────────────────────────────────────────────────────
