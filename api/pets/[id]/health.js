@@ -30,15 +30,27 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'PATCH' && recordId) {
-    const { ai_explanation } = req.body || {};
-    if (!ai_explanation) return res.status(400).json({ error: 'ai_explanation is required' });
-    const [updated] = await sql`
-      UPDATE health_records
-      SET ai_explanation = ${JSON.stringify(ai_explanation)}::jsonb
-      WHERE id = ${recordId} AND pet_id = ${pet_id}
-      RETURNING id, ai_explanation
-    `;
-    return res.status(200).json(updated);
+    const { ai_explanation, notes: notesUpdate } = req.body || {};
+    // PATCH ai_explanation (health exam AI result)
+    if (ai_explanation !== undefined) {
+      const [updated] = await sql`
+        UPDATE health_records
+        SET ai_explanation = ${JSON.stringify(ai_explanation)}::jsonb
+        WHERE id = ${recordId} AND pet_id = ${pet_id}
+        RETURNING id, ai_explanation
+      `;
+      return res.status(200).json(updated || {});
+    }
+    // PATCH notes (used for diary entry updates)
+    if (notesUpdate !== undefined) {
+      const [updated] = await sql`
+        UPDATE health_records SET notes = ${notesUpdate}
+        WHERE id = ${recordId} AND pet_id = ${pet_id}
+        RETURNING *
+      `;
+      return res.status(200).json(updated || {});
+    }
+    return res.status(400).json({ error: 'ai_explanation or notes is required' });
   }
 
   if (req.method === 'DELETE' && recordId) {

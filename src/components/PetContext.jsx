@@ -192,24 +192,33 @@ function financeFromDb(row) {
   };
 }
 
+// Walks and diary entries are stored in health_records with type='passeio'/'diario'.
+// Extra fields are JSON-encoded in the `notes` column.
 function walkToDb(walk) {
   return {
+    type: 'passeio',
+    title: 'Passeio',
     date: ddmmToIso(walk.date) || new Date().toISOString().slice(0, 10),
-    duration_min: walk.duration || 0,
-    distance_km: walk.distance ?? null,
-    mood: walk.mood ?? 0,
-    notes: walk.notes || null,
+    vet_name: null, clinic: null, cost_brl: null, attachment_url: null,
+    notes: JSON.stringify({
+      duration: walk.duration || 0,
+      distance: walk.distance ?? null,
+      mood: walk.mood ?? 0,
+      text: walk.notes || null,
+    }),
   };
 }
 
 function walkFromDb(row) {
+  let meta = {};
+  try { meta = JSON.parse(row.notes || '{}'); } catch {}
   return {
     id: row.id,
     date: isoToDdmm(row.date) || row.date,
-    duration: row.duration_min || 0,
-    distance: row.distance_km ? parseFloat(row.distance_km) : null,
-    mood: row.mood ?? 0,
-    notes: row.notes || null,
+    duration: meta.duration || 0,
+    distance: meta.distance ?? null,
+    mood: meta.mood ?? 0,
+    notes: meta.text || null,
     createdAt: row.created_at,
     _fromDb: true,
   };
@@ -217,22 +226,29 @@ function walkFromDb(row) {
 
 function diaryToDb(entry) {
   return {
+    type: 'diario',
+    title: 'Diário',
     date: ddmmToIso(entry.date) || new Date().toISOString().slice(0, 10),
-    mood: entry.mood ?? 3,
-    appetite: entry.appetite ?? 1,
-    behaviors: entry.behaviors || [],
-    note: entry.note || null,
+    vet_name: null, clinic: null, cost_brl: null, attachment_url: null,
+    notes: JSON.stringify({
+      mood: entry.mood ?? 3,
+      appetite: entry.appetite ?? 1,
+      behaviors: entry.behaviors || [],
+      note: entry.note || null,
+    }),
   };
 }
 
 function diaryFromDb(row) {
+  let meta = {};
+  try { meta = JSON.parse(row.notes || '{}'); } catch {}
   return {
     id: row.id,
     date: isoToDdmm(row.date) || row.date,
-    mood: row.mood ?? 3,
-    appetite: row.appetite ?? 1,
-    behaviors: Array.isArray(row.behaviors) ? row.behaviors : [],
-    note: row.note || null,
+    mood: meta.mood ?? 3,
+    appetite: meta.appetite ?? 1,
+    behaviors: Array.isArray(meta.behaviors) ? meta.behaviors : [],
+    note: meta.note || null,
     createdAt: row.created_at,
     _fromDb: true,
   };
@@ -492,23 +508,19 @@ export function PetProvider({ children }) {
     let cancelled = false;
     (async () => {
       try {
-        const [medsRes, healthRes, vacRes, finRes, walksRes, diaryRes] = await Promise.all([
+        const [medsRes, healthRes, vacRes, finRes] = await Promise.all([
           fetch(`/api/pets/${pid}/medications`),
           fetch(`/api/pets/${pid}/health`),
           fetch(`/api/pets/${pid}/vaccines`),
           fetch(`/api/pets/${pid}/finances`),
-          fetch(`/api/pets/${pid}/walks`),
-          fetch(`/api/pets/${pid}/diary`),
         ]);
         if (cancelled) return;
 
-        const [medsRows, healthRows, vacRows, finRows, walksRows, diaryRows] = await Promise.all([
+        const [medsRows, healthRows, vacRows, finRows] = await Promise.all([
           medsRes.ok   ? medsRes.json()   : null,
           healthRes.ok ? healthRes.json() : null,
           vacRes.ok    ? vacRes.json()    : null,
           finRes.ok    ? finRes.json()    : null,
-          walksRes.ok  ? walksRes.json()  : null,
-          diaryRes.ok  ? diaryRes.json()  : null,
         ]);
         if (cancelled) return;
 
@@ -517,16 +529,18 @@ export function PetProvider({ children }) {
           // Only overwrite when the API responded (null = request failed, keep cache).
           // This correctly handles empty arrays: if DB returns [], that IS the truth.
           const patch = {};
-          if (medsRows   !== null) patch.medications   = medsRows.map(medFromDb);
-          if (vacRows    !== null) patch.vaccines       = vacRows.map(vaccineFromDb);
-          if (finRows    !== null) patch.expenses       = finRows.map(financeFromDb);
-          if (walksRows  !== null) patch.walks          = walksRows.map(walkFromDb);
-          if (diaryRows  !== null) patch.diaryEntries   = diaryRows.map(diaryFromDb);
+          if (medsRows !== null) patch.medications = medsRows.map(medFromDb);
+          if (vacRows  !== null) patch.vaccines     = vacRows.map(vaccineFromDb);
+          if (finRows  !== null) patch.expenses     = finRows.map(financeFromDb);
           if (healthRows !== null) {
-            patch.healthRecords  = healthRows.filter(r => !['consulta','higiene','documento'].includes(r.type)).map(healthFromDb);
+            // health_records also stores walks (type='passeio') and diary (type='diario')
+            const knownTypes = ['consulta','higiene','documento','passeio','diario'];
+            patch.healthRecords  = healthRows.filter(r => !knownTypes.includes(r.type)).map(healthFromDb);
             patch.consultations  = healthRows.filter(r => r.type === 'consulta').map(healthFromDb);
             patch.hygieneRecords = healthRows.filter(r => r.type === 'higiene').map(healthFromDb);
             patch.documents      = healthRows.filter(r => r.type === 'documento').map(healthFromDb);
+            patch.walks          = healthRows.filter(r => r.type === 'passeio').map(walkFromDb);
+            patch.diaryEntries   = healthRows.filter(r => r.type === 'diario').map(diaryFromDb);
           }
           return { ...prev, [pid]: { ...cur, ...patch } };
         });
@@ -855,7 +869,7 @@ export function PetProvider({ children }) {
   const addDiaryEntry = (entry) => {
     const saved = addToList('diaryEntries', entry);
     if (saved && pid) {
-      fetch(`/api/pets/${pid}/diary`, {
+      fetch(`/api/pets/${pid}/health`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(diaryToDb(entry)),
@@ -868,10 +882,19 @@ export function PetProvider({ children }) {
   const updateDiaryEntry = (id, patch) => {
     updateItem('diaryEntries', id, patch);
     if (pid) {
-      fetch(`/api/pets/${pid}/diary?recordId=${id}`, {
+      const existing = (petData[pid]?.diaryEntries || []).find(e => e.id === id);
+      const merged = { ...existing, ...patch };
+      fetch(`/api/pets/${pid}/health?recordId=${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(diaryToDb(patch)),
+        body: JSON.stringify({
+          notes: JSON.stringify({
+            mood: merged.mood ?? 3,
+            appetite: merged.appetite ?? 1,
+            behaviors: merged.behaviors || [],
+            note: merged.note || null,
+          }),
+        }),
       }).catch(() => {});
     }
   };
@@ -880,7 +903,7 @@ export function PetProvider({ children }) {
   const addWalk = (walk) => {
     const saved = addToList('walks', walk);
     if (saved && pid) {
-      fetch(`/api/pets/${pid}/walks`, {
+      fetch(`/api/pets/${pid}/health`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(walkToDb(walk)),
@@ -892,7 +915,7 @@ export function PetProvider({ children }) {
   };
   const deleteWalk = (id) => {
     removeFromList('walks', id);
-    if (pid) fetch(`/api/pets/${pid}/walks?recordId=${id}`, { method: 'DELETE' }).catch(() => {});
+    if (pid) fetch(`/api/pets/${pid}/health?recordId=${id}`, { method: 'DELETE' }).catch(() => {});
   };
   const walkGoal    = pid ? (petData[pid]?.walkGoal ?? 5) : 5;
   const setWalkGoal = (g)    => setForPet('walkGoal', g);

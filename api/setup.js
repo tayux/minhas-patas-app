@@ -105,31 +105,9 @@ export default async function handler(req, res) {
         created_at TIMESTAMPTZ DEFAULT NOW()
       )
     `;
-    await sql`
-      CREATE TABLE IF NOT EXISTS walks (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        pet_id UUID REFERENCES pets(id) ON DELETE CASCADE,
-        date DATE NOT NULL,
-        duration_min INTEGER DEFAULT 0,
-        distance_km NUMERIC(6,2),
-        mood INTEGER DEFAULT 0,
-        notes TEXT,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `;
-    await sql`
-      CREATE TABLE IF NOT EXISTS diary_entries (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        pet_id UUID REFERENCES pets(id) ON DELETE CASCADE,
-        date DATE NOT NULL,
-        mood INTEGER DEFAULT 3,
-        appetite INTEGER DEFAULT 1,
-        behaviors JSONB DEFAULT '[]',
-        note TEXT,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `;
     // Migrations — safe to run on every setup call
+    // Note: walks (type='passeio') and diary entries (type='diario') are stored
+    // in health_records using JSON-encoded notes field — no separate tables needed.
     await sql`ALTER TABLE health_records ADD COLUMN IF NOT EXISTS ai_explanation JSONB`;
 
     res.status(200).json({ ok: true, message: 'Schema criado com sucesso' });
