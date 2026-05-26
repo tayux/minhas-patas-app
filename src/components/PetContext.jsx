@@ -217,7 +217,7 @@ function dbPetToUi(p) {
     tiles: [
       { label:'Saúde',        emoji:'🩺', sub:'ver registros'  },
       { label:'Medicamentos', emoji:'💊', sub:'ver lista'      },
-      { label:'Finanças',     emoji:'🪙', sub:'ver gastos'     },
+      { label:'Relatórios',   emoji:'📊', sub:'ver relatórios'  },
       { label:'Documentos',   emoji:'📁', sub:'ver arquivos'   },
     ],
     upcoming: [],
@@ -786,6 +786,12 @@ export function PetProvider({ children }) {
   const addDiaryEntry    = (entry) => addToList('diaryEntries', entry);
   const updateDiaryEntry = (id, patch) => updateItem('diaryEntries', id, patch);
 
+  const walks       = getList('walks');
+  const addWalk     = (walk) => addToList('walks', walk);
+  const deleteWalk  = (id)   => removeFromList('walks', id);
+  const walkGoal    = pid ? (petData[pid]?.walkGoal ?? 5) : 5;
+  const setWalkGoal = (g)    => setForPet('walkGoal', g);
+
   const feedbacks      = getList('feedbacks');
   const addFeedback    = (fb) => addToList('feedbacks', fb);
   const feedingConfig  = pid ? (petData[pid]?.feedingConfig || null) : null;
@@ -805,6 +811,7 @@ export function PetProvider({ children }) {
       healthRecords, addHealthRecord, deleteHealthRecord, saveExamExplanation,
       documents, addDocument, deleteDocument,
       diaryEntries, addDiaryEntry, updateDiaryEntry,
+      walks, addWalk, deleteWalk, walkGoal, setWalkGoal,
       feedbacks, addFeedback,
       feedingConfig, setFeedingConfig,
       todayTasks, setTodayTasks,

@@ -3,7 +3,7 @@ import { useNav } from '../components/NavContext.jsx';
 import { usePet } from '../components/PetContext.jsx';
 import { useAuth } from '../components/AuthContext.jsx';
 import { Icon, I, Card, EmojiCircle, IconCircle, SectionPill, CheckBubble, IconBtn, MascotAvatar, UserAvatar, Display, Eyebrow, BottomNav } from '../components/Shared.jsx';
-import { Stethoscope, Pill, Coins, FolderOpen } from 'lucide-react';
+import { Stethoscope, Pill, BarChart3, FolderOpen } from 'lucide-react';
 
 const DAYS_SHORT   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const MONTHS_SHORT = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
@@ -12,8 +12,8 @@ function todayLabel() {
   return `${DAYS_SHORT[d.getDay()]} · ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
 }
 
-const TILE_ROUTES = { Saúde:'health', Medicamentos:'meds', Finanças:'reports', Documentos:'documents' };
-const TILE_ICONS  = { Saúde: Stethoscope, Medicamentos: Pill, Finanças: Coins, Documentos: FolderOpen };
+const TILE_ROUTES = { Saúde:'health', Medicamentos:'meds', Relatórios:'reports', Documentos:'documents' };
+const TILE_ICONS  = { Saúde: Stethoscope, Medicamentos: Pill, Relatórios: BarChart3, Documentos: FolderOpen };
 const TILE_TINTS  = [
   { tint:T.tintRose,     ink:T.tintRoseInk     },
   { tint:T.tintLavender, ink:T.tintLavenderInk },
