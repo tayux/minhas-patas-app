@@ -107,7 +107,7 @@ export const EmojiCircle = ({ emoji, size = 44, tint = T.tintLavender, style }) 
 );
 
 export const SectionPill = ({ icon, label, count, tint = T.tintLavender, ink = T.tintLavenderInk, style }) => {
-  const IconEl = typeof icon === 'function' ? icon : null;
+  const IconEl = icon && typeof icon !== 'string' ? icon : null;
   return (
     <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'8px 14px 8px 12px',
       borderRadius:999, background:tint, color:ink, fontFamily:FONT_BODY, fontSize:11,
